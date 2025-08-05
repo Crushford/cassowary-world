@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function HomePage() {
   return (
-    <main className="container mx-auto min-h-screen max-w-3xl p-8">
+    <main className="container mx-auto min-h-screen p-8">
       <h1 className="text-4xl font-bold mb-8">Cassowary World</h1>
       <p className="text-lg mb-8">
         Welcome to the Cassowary World documentation and research portal.
