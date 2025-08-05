@@ -105,7 +105,10 @@ export default function HomePage() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="info-box">
+              <Link
+                href="/technical-docs"
+                className="info-box block hover:shadow-md transition-all duration-200"
+              >
                 <h3 className="font-semibold mb-2">Technical Documents</h3>
                 <p className="text-sm">
                   Explore detailed documents, cultural descriptions, and
@@ -113,7 +116,7 @@ export default function HomePage() {
                   civilization functions, thrives, and shapes its remarkable
                   world.
                 </p>
-              </div>
+              </Link>
 
               <div className="placeholder-box">
                 <h3
