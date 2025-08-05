@@ -2,7 +2,7 @@
 
 :root {
   --background: #f1f5e6; /* light rainforest parchment */
-  --foreground: #1b2815; /* ink on paper */
+  --foreground: #5f7d4d; /* dark green - consistent with leaf-shadow */
   --color-fern: #93b97e; /* headers + foliage tone */
   --color-leaf-shadow: #5f7d4d; /* details */
   --color-bird-blue: #386e73; /* subtle accents */
@@ -196,4 +196,85 @@ h1 {
 
 .footer-link:hover {
   color: var(--color-bird-blue);
+}
+
+/* ===== REUSABLE COMPONENT CLASSES ===== */
+
+/* Sidebar styling */
+.sidebar {
+  @apply w-80 shadow-lg border-r border-solid;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
+}
+
+/* Card styling */
+.card {
+  @apply rounded-lg shadow-sm border border-solid p-6 transition-all duration-200;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
+}
+
+.card:hover {
+  @apply shadow-md;
+  background-color: #f8fbe9;
+}
+
+/* Primary button styling */
+.btn-primary {
+  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5;
+  background-color: var(--color-cassowary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-bird-blue);
+}
+
+/* Secondary button styling */
+.btn-secondary {
+  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200 border border-solid;
+  background-color: var(--background);
+  border-color: var(--color-fern);
+  color: var(--color-cassowary);
+}
+
+.btn-secondary:hover {
+  background-color: #e7f0dc;
+  border-color: var(--color-leaf-shadow);
+}
+
+/* Category card styling */
+.category-card {
+  @apply block p-4 rounded-lg transition-all duration-200 text-white shadow-sm hover:shadow-md transform hover:-translate-y-0.5;
+  background-color: var(--color-cassowary);
+}
+
+.category-card:hover {
+  background-color: var(--color-bird-blue);
+}
+
+/* Info box styling */
+.info-box {
+  @apply border border-solid rounded-lg p-4;
+  background-color: #e7f0dc;
+  border-color: var(--color-fern);
+}
+
+.info-box h3 {
+  color: var(--color-cassowary);
+}
+
+.info-box p {
+  color: var(--color-leaf-shadow);
+}
+
+/* Placeholder styling */
+.placeholder-box {
+  @apply border-2 border-dashed rounded-lg p-4;
+  background-color: #f8fbe9;
+  border-color: var(--color-leaf-shadow);
+}
+
+.placeholder-box p {
+  color: var(--color-leaf-shadow);
 }
