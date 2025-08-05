@@ -141,3 +141,32 @@ body {
   @apply p-4 border-b;
   border-color: var(--color-leaf-shadow);
 }
+
+/* Technical Docs Page Styling */
+.doc-list-item {
+  @apply p-4 rounded-lg border border-solid transition-all duration-300 hover:shadow-md;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
+}
+
+.doc-list-item:hover {
+  background-color: #f8fbe9;
+  border-color: var(--color-fern);
+}
+
+.doc-link {
+  @apply block transition-all duration-300;
+}
+
+.doc-link:hover h2 {
+  color: var(--color-cassowary);
+}
+
+.back-link {
+  @apply inline-flex items-center text-lg font-medium transition-all duration-300 hover:underline;
+  color: var(--color-cassowary);
+}
+
+.back-link:hover {
+  color: var(--color-bird-blue);
+}

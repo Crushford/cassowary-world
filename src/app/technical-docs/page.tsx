@@ -24,14 +24,21 @@ export default async function TechnicalDocumentIndexPage() {
   )
 
   return (
-    <main>
-      <h1 className="text-4xl font-bold mb-8">Technical Documents</h1>
+    <main className="container mx-auto min-h-screen p-8">
+      <h1 className="text-4xl font-bold mb-8 text-[var(--color-cassowary)]">
+        Technical Documents
+      </h1>
       <ul className="flex flex-col gap-y-4">
         {docs.map(doc => (
-          <li className="hover:underline" key={doc._id}>
-            <Link href={`/technical-docs/${doc.slug.current}`}>
-              <h2 className="text-xl font-semibold">{doc.title}</h2>
-              <p className="text-sm text-gray-500">
+          <li key={doc._id} className="doc-list-item">
+            <Link
+              href={`/technical-docs/${doc.slug.current}`}
+              className="doc-link"
+            >
+              <h2 className="text-xl font-semibold text-[var(--color-leaf-shadow)]">
+                {doc.title}
+              </h2>
+              <p className="text-sm text-[var(--color-bird-blue)]">
                 Published: {new Date(doc._createdAt).toLocaleDateString()}
               </p>
             </Link>

@@ -33,7 +33,7 @@ export default async function TechnicalDocumentPage({
 
   return (
     <main className="container mx-auto min-h-screen p-8 flex flex-col gap-4">
-      <Link href="/technical-docs" className="hover:underline">
+      <Link href="/technical-docs" className="back-link">
         ← Back to documents
       </Link>
 
@@ -41,19 +41,21 @@ export default async function TechnicalDocumentPage({
         <img
           src={docImageUrl}
           alt={doc.title}
-          className="aspect-video rounded-xl"
+          className="aspect-video rounded-xl border border-[var(--color-leaf-shadow)]"
           width="550"
           height="310"
         />
       )}
 
-      <h1 className="text-4xl font-bold mb-2">{doc.title}</h1>
+      <h1 className="text-4xl font-bold mb-2 text-[var(--color-cassowary)]">
+        {doc.title}
+      </h1>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-[var(--color-bird-blue)]">
         Published: {new Date(doc._createdAt).toLocaleDateString()}
       </p>
 
-      <article className="prose prose-neutral dark:prose-invert max-w-none mt-4">
+      <article className="prose max-w-none mt-4">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {doc.markdown}
         </ReactMarkdown>
