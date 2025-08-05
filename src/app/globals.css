@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #ffffff;
@@ -23,4 +23,110 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Typography styles for markdown content */
+.prose {
+  color: #fef3c7; /* yellow-200 */
+  max-width: none;
+}
+
+.prose h1 {
+  color: #d4a857; /* feather-gold */
+  font-weight: bold;
+  font-size: 2.25rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.prose h2 {
+  color: #cf6e38; /* sunset-orange */
+  font-size: 1.875rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose h3 {
+  color: #1d4e89; /* cassowary-blue */
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose a {
+  color: #d4a857; /* feather-gold */
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #cf6e38; /* sunset-orange */
+}
+
+.prose strong {
+  color: #d4a857; /* feather-gold */
+  font-weight: bold;
+}
+
+.prose code {
+  background-color: #5c3d2e; /* earth-brown */
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #fef3c7; /* yellow-100 */
+  font-size: 0.875rem;
+}
+
+.prose pre {
+  background-color: #1f2937; /* gray-800 */
+  color: white;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  margin: 1rem 0;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: white;
+}
+
+/* Table styling */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.prose th {
+  background-color: #f3f4f6; /* gray-100 */
+  color: #111827; /* gray-900 */
+  font-weight: 600;
+  padding: 0.5rem;
+  text-align: left;
+  border: 1px solid #d1d5db; /* gray-300 */
+}
+
+.prose td {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  vertical-align: top;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .prose {
+    color: #d6d3d1; /* stone-200 */
+  }
+
+  .prose th {
+    background-color: #374151; /* gray-800 */
+    color: #f3f4f6; /* gray-100 */
+    border: 1px solid #4b5563; /* gray-600 */
+  }
+
+  .prose td {
+    border: 1px solid #4b5563; /* gray-600 */
+  }
 }
