@@ -7,11 +7,11 @@ import { client } from '@/sanity/client'
 const TECHNICAL_DOCS_QUERY = `*[
   _type == "technicalDocument"
   && defined(slug.current)
-]|order(publishedAt desc)[0...50]{
+]|order(_createdAt desc)[0...50]{
   _id,
   title,
   slug,
-  publishedAt
+  _createdAt
 }`
 
 const options = { next: { revalidate: 30 } }
@@ -32,7 +32,7 @@ export default async function TechnicalDocumentIndexPage() {
             <Link href={`/technical-docs/${doc.slug.current}`}>
               <h2 className="text-xl font-semibold">{doc.title}</h2>
               <p className="text-sm text-gray-500">
-                Published: {new Date(doc.publishedAt).toLocaleDateString()}
+                Published: {new Date(doc._createdAt).toLocaleDateString()}
               </p>
             </Link>
           </li>

@@ -50,7 +50,7 @@ export default async function TechnicalDocumentPage({
       <h1 className="text-4xl font-bold mb-2">{doc.title}</h1>
 
       <p className="text-sm text-gray-600">
-        Published: {new Date(doc.publishedAt).toLocaleDateString()}
+        Published: {new Date(doc._createdAt).toLocaleDateString()}
       </p>
 
       <article className="prose prose-neutral dark:prose-invert max-w-none mt-4">
