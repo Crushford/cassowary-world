@@ -1,7 +1,15 @@
 import Link from 'next/link'
 import { type SanityDocument } from 'next-sanity'
+import imageUrlBuilder from '@sanity/image-url'
+import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
 import { client } from '@/sanity/client'
+
+const { projectId, dataset } = client.config()
+const urlFor = (source: SanityImageSource) =>
+  projectId && dataset
+    ? imageUrlBuilder({ projectId, dataset }).image(source)
+    : null
 
 // Updated query to fetch technical documents
 const TECHNICAL_DOCS_QUERY = `*[
@@ -11,7 +19,8 @@ const TECHNICAL_DOCS_QUERY = `*[
   _id,
   title,
   slug,
-  _createdAt
+  _createdAt,
+  image
 }`
 
 const options = { next: { revalidate: 30 } }
@@ -29,21 +38,40 @@ export default async function TechnicalDocumentIndexPage() {
         Technical Documents
       </h1>
       <ul className="flex flex-col gap-y-4">
-        {docs.map(doc => (
-          <li key={doc._id} className="doc-list-item">
-            <Link
-              href={`/technical-docs/${doc.slug.current}`}
-              className="doc-link"
-            >
-              <h2 className="text-xl font-semibold text-[var(--color-leaf-shadow)]">
-                {doc.title}
-              </h2>
-              <p className="text-sm text-[var(--color-bird-blue)]">
-                Published: {new Date(doc._createdAt).toLocaleDateString()}
-              </p>
-            </Link>
-          </li>
-        ))}
+        {docs.map(doc => {
+          const thumbnailUrl = doc.image
+            ? urlFor(doc.image)?.width(120).height(80).url()
+            : null
+
+          return (
+            <li key={doc._id} className="doc-list-item">
+              <Link
+                href={`/technical-docs/${doc.slug.current}`}
+                className="doc-link"
+              >
+                <div className="flex gap-4 items-start">
+                  {thumbnailUrl && (
+                    <img
+                      src={thumbnailUrl}
+                      alt={doc.title}
+                      className="w-30 h-20 object-cover rounded-lg border border-[var(--color-leaf-shadow)] flex-shrink-0"
+                      width="120"
+                      height="80"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold text-[var(--color-leaf-shadow)]">
+                      {doc.title}
+                    </h2>
+                    <p className="text-sm text-[var(--color-bird-blue)]">
+                      Published: {new Date(doc._createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            </li>
+          )
+        })}
       </ul>
     </main>
   )
