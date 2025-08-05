@@ -11,7 +11,8 @@
 }
 
 body {
-  @apply font-serif bg-[var(--background)] text-[var(--foreground)];
+  font-family: var(--font-body);
+  @apply bg-[var(--background)] text-[var(--foreground)];
 }
 
 /* Container for rendered markdown */
@@ -25,11 +26,13 @@ body {
 /* Headings */
 .prose h1 {
   @apply text-4xl font-bold mt-10 mb-6;
+  font-family: var(--font-heading);
   color: var(--color-cassowary);
 }
 
 .prose h2 {
   @apply text-2xl font-semibold mt-8 mb-4 italic border-l-4 pl-4;
+  font-family: var(--font-heading);
   border-color: var(--color-fern);
   color: var(--color-leaf-shadow);
   background: linear-gradient(to right, #e7f0dc 30%, transparent);
@@ -37,6 +40,7 @@ body {
 
 .prose h3 {
   @apply text-xl font-semibold mt-6 mb-3;
+  font-family: var(--font-heading);
   color: var(--color-bird-blue);
 }
 
@@ -95,14 +99,16 @@ body {
 
 /* Inline code */
 .prose code {
-  @apply font-mono px-2 py-1 rounded bg-white text-sm border;
+  @apply px-2 py-1 rounded bg-white text-sm border;
+  font-family: var(--font-mono);
   border-color: var(--color-fern);
   color: var(--foreground);
 }
 
 /* Code blocks */
 .prose pre {
-  @apply p-4 rounded overflow-x-auto text-sm my-6 font-mono border;
+  @apply p-4 rounded overflow-x-auto text-sm my-6 border;
+  font-family: var(--font-mono);
   background-color: #eef6de;
   border-color: var(--color-leaf-shadow);
 }
@@ -149,6 +155,11 @@ body {
   border-color: var(--color-leaf-shadow);
 }
 
+/* Page titles should use heading font */
+h1 {
+  font-family: var(--font-heading);
+}
+
 .doc-list-item:hover {
   background-color: #f8fbe9;
   border-color: var(--color-fern);
@@ -168,5 +179,21 @@ body {
 }
 
 .back-link:hover {
+  color: var(--color-bird-blue);
+}
+
+/* Footer Bar Styling */
+.footer-bar {
+  @apply border-t border-solid mt-auto;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
+}
+
+.footer-link {
+  @apply underline font-medium transition-all duration-300;
+  color: var(--color-cassowary);
+}
+
+.footer-link:hover {
   color: var(--color-bird-blue);
 }
