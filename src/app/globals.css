@@ -1,86 +1,68 @@
 @import 'tailwindcss';
 
-/* Root color palette — dark mode only */
 :root {
-  --background: #1b1915; /* deep shadow brown */
-  --foreground: #d6d2c4; /* soft paper white */
-  --color-parchment: #2a251f; /* dark worn paper */
-  --color-ink: #ede9dd; /* main text */
-  --color-bronze: #b48a64; /* accents, borders */
-  --color-stone: #7c6e57; /* headings, block elements */
-  --color-amber: #d2a565; /* links, hovers, warm notes */
+  --background: #f1f5e6; /* light rainforest parchment */
+  --foreground: #1b2815; /* ink on paper */
+  --color-fern: #93b97e; /* headers + foliage tone */
+  --color-leaf-shadow: #5f7d4d; /* details */
+  --color-bird-blue: #386e73; /* subtle accents */
+  --color-cassowary: #3f508c; /* link and header contrast */
+  --color-wattle-yellow: #e5c07b; /* callouts and list markers */
 }
 
-/* Page base */
 body {
-  @apply bg-[var(--background)] text-[var(--foreground)] font-serif;
+  @apply font-serif bg-[var(--background)] text-[var(--foreground)];
 }
 
-/* Markdown prose container */
+/* Container for rendered markdown */
 .prose {
-  @apply leading-relaxed text-base p-8 rounded-md border shadow-sm;
-  background-color: var(--color-parchment);
+  @apply max-w-3xl mx-auto p-8 leading-relaxed text-base rounded-xl shadow-md border border-solid;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
   color: var(--foreground);
-  border-color: var(--color-bronze);
 }
 
 /* Headings */
 .prose h1 {
-  @apply font-bold text-3xl mt-12 mb-6 border-b pb-2 tracking-wide uppercase;
-  color: var(--color-ink);
-  border-color: var(--color-bronze);
+  @apply text-4xl font-bold mt-10 mb-6;
+  color: var(--color-cassowary);
 }
 
 .prose h2 {
-  @apply text-2xl mt-10 mb-4 border-l-4 pl-4 italic font-semibold;
-  color: var(--color-stone);
-  border-color: var(--color-bronze);
+  @apply text-2xl font-semibold mt-8 mb-4 italic border-l-4 pl-4;
+  border-color: var(--color-fern);
+  color: var(--color-leaf-shadow);
+  background: linear-gradient(to right, #e7f0dc 30%, transparent);
 }
 
 .prose h3 {
-  @apply text-xl mt-8 mb-3 font-semibold border-b pb-1;
-  color: var(--color-ink);
-  border-color: var(--color-stone);
+  @apply text-xl font-semibold mt-6 mb-3;
+  color: var(--color-bird-blue);
 }
 
 /* Paragraphs */
 .prose p {
   @apply mb-5 text-justify indent-6;
-  color: var(--color-ink);
+  color: var(--foreground);
+}
+
+/* Emphasis and strong */
+.prose strong {
+  @apply font-bold;
+  color: var(--color-leaf-shadow);
+}
+
+.prose em {
+  @apply italic;
 }
 
 /* Links */
 .prose a {
-  @apply underline transition-all;
-  color: var(--color-amber);
+  @apply underline font-medium transition-all duration-300;
+  color: var(--color-cassowary);
 }
 .prose a:hover {
-  color: var(--color-stone);
-}
-
-/* Emphasis */
-.prose strong {
-  @apply font-bold;
-  color: var(--color-amber);
-}
-
-/* Inline code */
-.prose code {
-  @apply px-2 py-1 rounded text-sm font-mono border;
-  background-color: color-mix(in srgb, var(--color-stone) 20%, transparent);
-  border-color: color-mix(in srgb, var(--color-stone) 40%, transparent);
-  color: var(--color-ink);
-}
-
-/* Code blocks */
-.prose pre {
-  @apply p-4 rounded overflow-x-auto text-sm my-6 font-mono border;
-  background-color: color-mix(in srgb, var(--color-stone) 25%, black);
-  border-color: color-mix(in srgb, var(--color-stone) 40%, transparent);
-  color: var(--color-ink);
-}
-.prose pre code {
-  @apply bg-transparent p-0 border-none;
+  color: var(--color-bird-blue);
 }
 
 /* Lists */
@@ -90,52 +72,72 @@ body {
 }
 
 .prose li {
-  @apply mb-2 leading-relaxed text-[var(--color-ink)];
+  @apply mb-2 leading-relaxed;
 }
 
 .prose ul li::before {
-  @apply font-bold mr-2;
-  color: var(--color-amber);
+  @apply content-['❧'] text-lg font-bold mr-2;
+  color: var(--color-wattle-yellow);
 }
 
 .prose ol {
-  counter-reset: list-counter;
+  counter-reset: item;
 }
 .prose ol li {
   @apply pl-2;
-  counter-increment: list-counter;
+  counter-increment: item;
 }
 .prose ol li::before {
-  content: counter(list-counter) '. ';
-  @apply font-bold mr-1;
-  color: var(--color-amber);
+  content: counter(item) '. ';
+  @apply font-semibold mr-2;
+  color: var(--color-fern);
 }
 
-/* Horizontal rules */
+/* Inline code */
+.prose code {
+  @apply font-mono px-2 py-1 rounded bg-white text-sm border;
+  border-color: var(--color-fern);
+  color: var(--foreground);
+}
+
+/* Code blocks */
+.prose pre {
+  @apply p-4 rounded overflow-x-auto text-sm my-6 font-mono border;
+  background-color: #eef6de;
+  border-color: var(--color-leaf-shadow);
+}
+
+/* Blockquote */
+.prose blockquote {
+  @apply border-l-4 pl-4 italic my-6;
+  border-color: var(--color-fern);
+  background-color: #f8fbe9;
+}
+
+/* Horizontal rule */
 .prose hr {
-  @apply border-none h-px my-12;
-  background-color: var(--color-bronze);
+  @apply my-10 border-0 h-px;
+  background: linear-gradient(
+    to right,
+    var(--color-leaf-shadow),
+    transparent,
+    var(--color-leaf-shadow)
+  );
 }
 
 /* Tables */
 .prose table {
-  @apply w-full border-collapse my-8 rounded overflow-hidden border;
-  border-color: var(--color-stone);
+  @apply w-full border-collapse my-8;
+  border: 1px solid var(--color-leaf-shadow);
 }
 
 .prose th {
-  @apply font-semibold p-4 text-left border-b;
-  background-color: color-mix(in srgb, var(--color-stone) 30%, transparent);
-  border-color: var(--color-stone);
-  color: var(--color-ink);
+  @apply p-4 text-left font-semibold border-b;
+  background-color: #e9f2dd;
+  color: var(--foreground);
 }
 
 .prose td {
-  @apply p-4 border-b align-top;
-  border-color: color-mix(in srgb, var(--color-stone) 25%, transparent);
-  color: var(--color-ink);
-}
-
-.prose tr:nth-child(even) {
-  background-color: color-mix(in srgb, var(--color-parchment) 25%, transparent);
+  @apply p-4 border-b;
+  border-color: var(--color-leaf-shadow);
 }
