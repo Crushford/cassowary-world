@@ -1,26 +1,280 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #f1f5e6; /* light rainforest parchment */
+  --foreground: #5f7d4d; /* dark green - consistent with leaf-shadow */
+  --color-fern: #93b97e; /* headers + foliage tone */
+  --color-leaf-shadow: #5f7d4d; /* details */
+  --color-bird-blue: #386e73; /* subtle accents */
+  --color-cassowary: #3f508c; /* link and header contrast */
+  --color-wattle-yellow: #e5c07b; /* callouts and list markers */
 }
 
 body {
-  background: var(--background);
+  font-family: var(--font-body);
+  @apply bg-[var(--background)] text-[var(--foreground)];
+}
+
+/* Container for rendered markdown */
+.prose {
+  @apply mx-auto p-8 leading-relaxed text-base rounded-xl shadow-md border border-solid;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Headings */
+.prose h1 {
+  @apply text-4xl font-bold mt-10 mb-6;
+  font-family: var(--font-heading);
+  color: var(--color-cassowary);
+}
+
+.prose h2 {
+  @apply text-2xl font-semibold mt-8 mb-4 italic border-l-4 pl-4;
+  font-family: var(--font-heading);
+  border-color: var(--color-fern);
+  color: var(--color-leaf-shadow);
+  background: linear-gradient(to right, #e7f0dc 30%, transparent);
+}
+
+.prose h3 {
+  @apply text-xl font-semibold mt-6 mb-3;
+  font-family: var(--font-heading);
+  color: var(--color-bird-blue);
+}
+
+/* Paragraphs */
+.prose p {
+  @apply mb-5 text-justify indent-6;
+  color: var(--foreground);
+}
+
+/* Emphasis and strong */
+.prose strong {
+  @apply font-bold;
+  color: var(--color-leaf-shadow);
+}
+
+.prose em {
+  @apply italic;
+}
+
+/* Links */
+.prose a {
+  @apply underline font-medium transition-all duration-300;
+  color: var(--color-cassowary);
+}
+.prose a:hover {
+  color: var(--color-bird-blue);
+}
+
+/* Lists */
+.prose ul,
+.prose ol {
+  @apply my-6 pl-6;
+}
+
+.prose li {
+  @apply mb-2 leading-relaxed;
+}
+
+.prose ul li::before {
+  @apply content-['❧'] text-lg font-bold mr-2;
+  color: var(--color-wattle-yellow);
+}
+
+.prose ol {
+  counter-reset: item;
+}
+.prose ol li {
+  @apply pl-2;
+  counter-increment: item;
+}
+.prose ol li::before {
+  content: counter(item) '. ';
+  @apply font-semibold mr-2;
+  color: var(--color-fern);
+}
+
+/* Inline code */
+.prose code {
+  @apply px-2 py-1 rounded bg-white text-sm border;
+  font-family: var(--font-mono);
+  border-color: var(--color-fern);
+  color: var(--foreground);
+}
+
+/* Code blocks */
+.prose pre {
+  @apply p-4 rounded overflow-x-auto text-sm my-6 border;
+  font-family: var(--font-mono);
+  background-color: #eef6de;
+  border-color: var(--color-leaf-shadow);
+}
+
+/* Blockquote */
+.prose blockquote {
+  @apply border-l-4 pl-4 italic my-6;
+  border-color: var(--color-fern);
+  background-color: #f8fbe9;
+}
+
+/* Horizontal rule */
+.prose hr {
+  @apply my-10 border-0 h-px;
+  background: linear-gradient(
+    to right,
+    var(--color-leaf-shadow),
+    transparent,
+    var(--color-leaf-shadow)
+  );
+}
+
+/* Tables */
+.prose table {
+  @apply w-full border-collapse my-8;
+  border: 1px solid var(--color-leaf-shadow);
+}
+
+.prose th {
+  @apply p-4 text-left font-semibold border-b;
+  background-color: #e9f2dd;
+  color: var(--foreground);
+}
+
+.prose td {
+  @apply p-4 border-b;
+  border-color: var(--color-leaf-shadow);
+}
+
+/* Technical Docs Page Styling */
+.doc-list-item {
+  @apply p-4 rounded-lg border border-solid transition-all duration-300 hover:shadow-md;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
+}
+
+/* Page titles should use heading font */
+h1 {
+  font-family: var(--font-heading);
+}
+
+.doc-list-item:hover {
+  background-color: #f8fbe9;
+  border-color: var(--color-fern);
+}
+
+.doc-link {
+  @apply block transition-all duration-300;
+}
+
+.doc-link:hover h2 {
+  color: var(--color-cassowary);
+}
+
+.back-link {
+  @apply inline-flex items-center text-lg font-medium transition-all duration-300 hover:underline;
+  color: var(--color-cassowary);
+}
+
+.back-link:hover {
+  color: var(--color-bird-blue);
+}
+
+/* Footer Bar Styling */
+.footer-bar {
+  @apply border-t border-solid mt-auto;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
+}
+
+.footer-link {
+  @apply underline font-medium transition-all duration-300;
+  color: var(--color-cassowary);
+}
+
+.footer-link:hover {
+  color: var(--color-bird-blue);
+}
+
+/* ===== REUSABLE COMPONENT CLASSES ===== */
+
+/* Sidebar styling */
+.sidebar {
+  @apply w-80 shadow-lg border-r border-solid;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
+}
+
+/* Card styling */
+.card {
+  @apply rounded-lg shadow-sm border border-solid p-6 transition-all duration-200;
+  background-color: var(--background);
+  border-color: var(--color-leaf-shadow);
+}
+
+.card:hover {
+  @apply shadow-md;
+  background-color: #f8fbe9;
+}
+
+/* Primary button styling */
+.btn-primary {
+  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5;
+  background-color: var(--color-cassowary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-bird-blue);
+}
+
+/* Secondary button styling */
+.btn-secondary {
+  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200 border border-solid;
+  background-color: var(--background);
+  border-color: var(--color-fern);
+  color: var(--color-cassowary);
+}
+
+.btn-secondary:hover {
+  background-color: #e7f0dc;
+  border-color: var(--color-leaf-shadow);
+}
+
+/* Category card styling */
+.category-card {
+  @apply block p-4 rounded-lg transition-all duration-200 text-white shadow-sm hover:shadow-md transform hover:-translate-y-0.5;
+  background-color: var(--color-cassowary);
+}
+
+.category-card:hover {
+  background-color: var(--color-bird-blue);
+}
+
+/* Info box styling */
+.info-box {
+  @apply border border-solid rounded-lg p-4;
+  background-color: #e7f0dc;
+  border-color: var(--color-fern);
+}
+
+.info-box h3 {
+  color: var(--color-cassowary);
+}
+
+.info-box p {
+  color: var(--color-leaf-shadow);
+}
+
+/* Placeholder styling */
+.placeholder-box {
+  @apply border-2 border-dashed rounded-lg p-4;
+  background-color: #f8fbe9;
+  border-color: var(--color-leaf-shadow);
+}
+
+.placeholder-box p {
+  color: var(--color-leaf-shadow);
 }
