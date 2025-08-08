@@ -72,15 +72,6 @@ export default function HomePage() {
               </Link>
             ))}
           </nav>
-
-          {/* Future categories placeholder */}
-          {documentCategories.length < 4 && (
-            <div className="mt-8 placeholder-box">
-              <p className="text-sm text-center">
-                More document categories coming soon...
-              </p>
-            </div>
-          )}
         </div>
       </aside>
 
