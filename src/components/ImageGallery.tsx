@@ -29,12 +29,12 @@ export default function ImageGallery({ images }: { images: SanityImage[] }) {
           href={image.url}
           className="overflow-hidden rounded-lg group relative block"
         >
-          <div className="relative w-full aspect-[4/3]">
+          <div className="relative w-full aspect-[3/2]">
             <Image
               src={image.url}
               alt={image.alt || ''}
               fill
-              className="object-cover transition-transform group-hover:scale-105 rounded-lg"
+              className="object-contain transition-transform group-hover:scale-105 rounded-lg"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
           </div>
