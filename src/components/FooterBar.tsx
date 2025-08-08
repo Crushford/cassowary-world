@@ -8,7 +8,7 @@ export default function FooterBar() {
           <div className="flex items-center gap-2">
             <span>📖</span>
             <span>
-              This project is open source —{' '}
+              See a mistake? Want to add something?{' '}
               <a
                 href="https://cassowary-world.sanity.studio/"
                 className="footer-link underline hover:text-[var(--color-lichen-gold)]"
