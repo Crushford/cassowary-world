@@ -1,6 +1,7 @@
 import { type SanityDocument } from 'next-sanity'
 import { client } from '@/sanity/client'
 import Link from 'next/link'
+import Image from 'next/image'
 import imageUrlBuilder from '@sanity/image-url'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
@@ -42,11 +43,15 @@ export default async function ConceptArtList() {
                 className="doc-link"
               >
                 {thumb && (
-                  <img
-                    src={thumb}
-                    alt={art.title}
-                    className="rounded-lg mb-4"
-                  />
+                  <div className="relative w-full aspect-[4/3] mb-4">
+                    <Image
+                      src={thumb}
+                      alt={art.title}
+                      fill
+                      className="object-cover rounded-lg"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  </div>
                 )}
                 <h2 className="text-2xl font-semibold">{art.title}</h2>
                 <p className="text-sm text-[var(--color-bird-blue)]">

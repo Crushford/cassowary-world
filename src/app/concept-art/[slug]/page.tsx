@@ -4,6 +4,8 @@ import imageUrlBuilder from '@sanity/image-url'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import Link from 'next/link'
+import Image from 'next/image'
+import ImageGallery from '@/components/ImageGallery'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
 const CONCEPT_ART_QUERY = `*[_type == "conceptArt" && slug.current == $slug][0]`
@@ -38,13 +40,15 @@ export default async function ConceptArtPage({
       </Link>
 
       {headerUrl && (
-        <img
-          src={headerUrl}
-          alt={doc.title}
-          className="aspect-video rounded-xl border border-[var(--color-leaf-shadow)]"
-          width="550"
-          height="310"
-        />
+        <div className="relative w-full aspect-video rounded-xl border border-[var(--color-leaf-shadow)]">
+          <Image
+            src={headerUrl}
+            alt={doc.title}
+            fill
+            className="object-cover rounded-xl"
+            sizes="(max-width: 768px) 100vw, 800px"
+          />
+        </div>
       )}
 
       <h1 className="text-4xl font-bold mb-2 text-[var(--color-cassowary)]">
@@ -56,28 +60,36 @@ export default async function ConceptArtPage({
       </p>
 
       {doc.images?.length > 0 && (
-        <section className="grid md:grid-cols-2 gap-6 mt-8">
-          {doc.images.map((entry: any, i: number) => (
-            <div key={i} className="card">
-              {entry.image && (
-                <img
-                  src={urlFor(entry.image)?.width(600).url()}
-                  alt={entry.caption || `Concept Art ${i + 1}`}
-                  className="rounded-lg mb-3"
-                />
-              )}
-              {entry.caption && (
-                <p className="text-sm text-[var(--foreground)] mb-2">
-                  <strong>Note:</strong> {entry.caption}
-                </p>
-              )}
-              {entry.tags?.length > 0 && (
-                <p className="text-xs text-[var(--color-bird-blue)] italic">
-                  Tags: {entry.tags.join(', ')}
-                </p>
-              )}
-            </div>
-          ))}
+        <section className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4 text-[var(--color-cassowary)]">
+            Gallery
+          </h2>
+          <ImageGallery
+            images={doc.images.map((entry: any) => ({
+              url: urlFor(entry.image)?.width(800).url() || '',
+              alt: entry.caption || 'Concept Art',
+              width: entry.image?.asset?.metadata?.dimensions?.width,
+              height: entry.image?.asset?.metadata?.dimensions?.height
+            }))}
+          />
+
+          {/* Display captions and tags below the gallery */}
+          <div className="mt-6 space-y-4">
+            {doc.images.map((entry: any, i: number) => (
+              <div key={i} className="card">
+                {entry.caption && (
+                  <p className="text-sm text-[var(--foreground)] mb-2">
+                    <strong>Note:</strong> {entry.caption}
+                  </p>
+                )}
+                {entry.tags?.length > 0 && (
+                  <p className="text-xs text-[var(--color-bird-blue)] italic">
+                    Tags: {entry.tags.join(', ')}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
