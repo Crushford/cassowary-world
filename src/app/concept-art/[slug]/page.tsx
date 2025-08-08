@@ -8,6 +8,22 @@ import Image from 'next/image'
 import ImageGallery from '@/components/ImageGallery'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
+// TypeScript interfaces for concept art data
+interface ConceptArtImage {
+  image: SanityImageSource
+  caption?: string
+  tags?: string[]
+}
+
+interface ConceptArtDocument extends SanityDocument {
+  title: string
+  slug: { current: string }
+  headerImage?: SanityImageSource
+  images?: ConceptArtImage[]
+  description?: string
+  _createdAt: string
+}
+
 const CONCEPT_ART_QUERY = `*[_type == "conceptArt" && slug.current == $slug][0]`
 const options = { next: { revalidate: 30 } }
 
@@ -23,7 +39,7 @@ export default async function ConceptArtPage({
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const doc = await client.fetch<SanityDocument>(
+  const doc = await client.fetch<ConceptArtDocument>(
     CONCEPT_ART_QUERY,
     await params,
     options
@@ -59,30 +75,28 @@ export default async function ConceptArtPage({
         Created: {new Date(doc._createdAt).toLocaleDateString()}
       </p>
 
-      {doc.images?.length > 0 && (
+      {doc.images && doc.images.length > 0 && (
         <section className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-[var(--color-cassowary)]">
             Gallery
           </h2>
           <ImageGallery
-            images={doc.images.map((entry: any) => ({
+            images={doc.images.map((entry: ConceptArtImage) => ({
               url: urlFor(entry.image)?.width(800).url() || '',
-              alt: entry.caption || 'Concept Art',
-              width: entry.image?.asset?.metadata?.dimensions?.width,
-              height: entry.image?.asset?.metadata?.dimensions?.height
+              alt: entry.caption || 'Concept Art'
             }))}
           />
 
           {/* Display captions and tags below the gallery */}
           <div className="mt-6 space-y-4">
-            {doc.images.map((entry: any, i: number) => (
+            {doc.images.map((entry: ConceptArtImage, i: number) => (
               <div key={i} className="card">
                 {entry.caption && (
                   <p className="text-sm text-[var(--foreground)] mb-2">
                     <strong>Note:</strong> {entry.caption}
                   </p>
                 )}
-                {entry.tags?.length > 0 && (
+                {entry.tags && entry.tags.length > 0 && (
                   <p className="text-xs text-[var(--color-bird-blue)] italic">
                     Tags: {entry.tags.join(', ')}
                   </p>

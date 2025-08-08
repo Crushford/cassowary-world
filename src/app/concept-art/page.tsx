@@ -5,6 +5,14 @@ import Image from 'next/image'
 import imageUrlBuilder from '@sanity/image-url'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
+// TypeScript interface for concept art list item
+interface ConceptArtListItem extends SanityDocument {
+  title: string
+  slug: { current: string }
+  headerImage?: SanityImageSource
+  _createdAt: string
+}
+
 const CONCEPT_ART_LIST_QUERY = `*[_type == "conceptArt"] | order(_createdAt desc) {
   title, slug, headerImage, _createdAt
 }`
@@ -19,7 +27,7 @@ const urlFor = (source: SanityImageSource) =>
     : null
 
 export default async function ConceptArtList() {
-  const artworks = await client.fetch<SanityDocument[]>(
+  const artworks = await client.fetch<ConceptArtListItem[]>(
     CONCEPT_ART_LIST_QUERY,
     {},
     options
@@ -31,7 +39,7 @@ export default async function ConceptArtList() {
         Concept Art Gallery
       </h1>
       <ul className="grid md:grid-cols-2 gap-6">
-        {artworks.map((art: any) => {
+        {artworks.map((art: ConceptArtListItem) => {
           const thumb = art.headerImage
             ? urlFor(art.headerImage)?.width(600).url()
             : null
