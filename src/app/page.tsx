@@ -9,6 +9,14 @@ const documentCategories = [
       'Explore detailed documents, cultural descriptions, and scholarly guides that illuminate how this cassowary civilization functions, thrives, and shapes its remarkable world.',
     href: '/technical-docs',
     icon: '🔧'
+  },
+  {
+    id: 'speeches',
+    name: 'Speeches',
+    description:
+      'Listen to the voices of cassowary leaders, orators, and visionaries as they address their society with wisdom, inspiration, and calls to action.',
+    href: '/speeches',
+    icon: '🎤'
   }
   // Future categories can be added here:
   // {
@@ -61,7 +69,7 @@ export default function HomePage() {
           </nav>
 
           {/* Future categories placeholder */}
-          {documentCategories.length === 1 && (
+          {documentCategories.length < 3 && (
             <div className="mt-8 placeholder-box">
               <p className="text-sm text-center">
                 More document categories coming soon...
@@ -118,18 +126,17 @@ export default function HomePage() {
                 </p>
               </Link>
 
-              <div className="placeholder-box">
-                <h3
-                  className="font-semibold mb-2"
-                  style={{ color: 'var(--color-leaf-shadow)' }}
-                >
-                  Coming Soon
-                </h3>
+              <Link
+                href="/speeches"
+                className="info-box block hover:shadow-md transition-all duration-200"
+              >
+                <h3 className="font-semibold mb-2">Speeches</h3>
                 <p className="text-sm">
-                  More document categories will be added as our collection
-                  grows.
+                  Listen to the voices of cassowary leaders, orators, and
+                  visionaries as they address their society with wisdom,
+                  inspiration, and calls to action.
                 </p>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
