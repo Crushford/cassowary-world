@@ -33,6 +33,20 @@ export default function FooterBar() {
               </a>
             </span>
           </div>
+          <div className="flex items-center gap-2">
+            <span>🎮</span>
+            <span>
+              If you like this, you might also like{' '}
+              <a
+                href="https://www.cassowarygames.com/"
+                className="footer-link underline hover:text-[var(--color-lichen-gold)]"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Cassowary Games
+              </a>
+            </span>
+          </div>
         </div>
       </div>
     </footer>
