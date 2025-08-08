@@ -16,7 +16,7 @@ export default async function SpeechesList() {
   )
 
   return (
-    <main className="container mx-auto min-h-screen p-8">
+    <main className="container mx-auto  p-8">
       <h1 className="text-4xl font-bold mb-8 text-[var(--color-cassowary)]">
         Speeches
       </h1>

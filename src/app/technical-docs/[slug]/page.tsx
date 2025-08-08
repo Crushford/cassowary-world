@@ -32,7 +32,7 @@ export default async function TechnicalDocumentPage({
     : null
 
   return (
-    <main className="container mx-auto min-h-screen p-8 flex flex-col gap-4">
+    <main className="container mx-auto  p-8 flex flex-col gap-4">
       <Link href="/technical-docs" className="back-link">
         ← Back to documents
       </Link>

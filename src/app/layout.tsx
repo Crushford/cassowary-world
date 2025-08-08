@@ -84,7 +84,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${playfair.variable} ${crimson.variable} ${mono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${playfair.variable} ${crimson.variable} ${mono.variable} antialiased  flex flex-col`}
       >
         <div className="flex-1">{children}</div>
         <FooterBar />

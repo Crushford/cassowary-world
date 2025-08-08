@@ -33,7 +33,7 @@ export default async function CompiledTechnicalDocsPage() {
     .join('')
 
   return (
-    <main className="container mx-auto min-h-screen p-8">
+    <main className="container mx-auto  p-8">
       <div className="mb-8">
         <Link
           href="/technical-docs"

@@ -37,10 +37,7 @@ const documentCategories = [
 
 export default function HomePage() {
   return (
-    <div
-      className="flex min-h-screen"
-      style={{ backgroundColor: 'var(--background)' }}
-    >
+    <div className="flex " style={{ backgroundColor: 'var(--background)' }}>
       {/* Left Sidebar */}
       <aside className="sidebar">
         <div className="p-6">

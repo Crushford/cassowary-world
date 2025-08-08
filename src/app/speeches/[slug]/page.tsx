@@ -33,7 +33,7 @@ export default async function SpeechPage({
     : null
 
   return (
-    <main className="container mx-auto min-h-screen p-8 flex flex-col gap-4">
+    <main className="container mx-auto  p-8 flex flex-col gap-4">
       <Link href="/speeches" className="back-link">
         ← Back to speeches
       </Link>
