@@ -17,6 +17,14 @@ const documentCategories = [
       'Listen to the voices of cassowary leaders, orators, and visionaries as they address their society with wisdom, inspiration, and calls to action.',
     href: '/speeches',
     icon: '🎤'
+  },
+  {
+    id: 'concept-art',
+    name: 'Concept Art',
+    description:
+      'Explore visual designs, sketches, and artistic renderings that bring the cassowary world to life through the eyes of its creators.',
+    href: '/concept-art',
+    icon: '🎨'
   }
   // Future categories can be added here:
   // {
@@ -66,7 +74,7 @@ export default function HomePage() {
           </nav>
 
           {/* Future categories placeholder */}
-          {documentCategories.length < 3 && (
+          {documentCategories.length < 4 && (
             <div className="mt-8 placeholder-box">
               <p className="text-sm text-center">
                 More document categories coming soon...
@@ -109,7 +117,7 @@ export default function HomePage() {
               different needs and interests.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link
                 href="/technical-docs"
                 className="info-box block hover:shadow-md transition-all duration-200"
@@ -132,6 +140,18 @@ export default function HomePage() {
                   Listen to the voices of cassowary leaders, orators, and
                   visionaries as they address their society with wisdom,
                   inspiration, and calls to action.
+                </p>
+              </Link>
+
+              <Link
+                href="/concept-art"
+                className="info-box block hover:shadow-md transition-all duration-200"
+              >
+                <h3 className="font-semibold mb-2">Concept Art</h3>
+                <p className="text-sm">
+                  Explore visual designs, sketches, and artistic renderings that
+                  bring the cassowary world to life through the eyes of its
+                  creators.
                 </p>
               </Link>
             </div>
