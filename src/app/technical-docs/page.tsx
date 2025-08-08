@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { type SanityDocument } from 'next-sanity'
+import Image from 'next/image'
 import imageUrlBuilder from '@sanity/image-url'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
@@ -33,7 +34,7 @@ export default async function TechnicalDocumentIndexPage() {
   )
 
   return (
-    <main className="container mx-auto min-h-screen p-8">
+    <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold text-[var(--color-cassowary)]">
           Technical Documents
@@ -59,13 +60,15 @@ export default async function TechnicalDocumentIndexPage() {
               >
                 <div className="flex gap-4 items-start">
                   {thumbnailUrl && (
-                    <img
-                      src={thumbnailUrl}
-                      alt={doc.title}
-                      className="w-30 h-20 object-cover rounded-lg border border-[var(--color-leaf-shadow)] flex-shrink-0"
-                      width="120"
-                      height="80"
-                    />
+                    <div className="relative w-30 h-20 rounded-lg border border-[var(--color-leaf-shadow)] flex-shrink-0">
+                      <Image
+                        src={thumbnailUrl}
+                        alt={doc.title}
+                        fill
+                        className="object-cover rounded-lg"
+                        sizes="120px"
+                      />
+                    </div>
                   )}
                   <div className="flex-1">
                     <h2 className="text-xl font-semibold text-[var(--color-leaf-shadow)]">
@@ -81,6 +84,6 @@ export default async function TechnicalDocumentIndexPage() {
           )
         })}
       </ul>
-    </main>
+    </div>
   )
 }
