@@ -3,6 +3,7 @@ import imageUrlBuilder from '@sanity/image-url'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 import { client } from '@/sanity/client'
 import Link from 'next/link'
+import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -38,13 +39,15 @@ export default async function TechnicalDocumentPage({
       </Link>
 
       {docImageUrl && (
-        <img
-          src={docImageUrl}
-          alt={doc.title}
-          className="aspect-video rounded-xl border border-[var(--color-leaf-shadow)]"
-          width="550"
-          height="310"
-        />
+        <div className="relative w-full aspect-video rounded-xl border border-[var(--color-leaf-shadow)]">
+          <Image
+            src={docImageUrl}
+            alt={doc.title}
+            fill
+            className="object-cover rounded-xl"
+            sizes="(max-width: 768px) 100vw, 800px"
+          />
+        </div>
       )}
 
       <h1 className="text-4xl font-bold mb-2 text-[var(--color-cassowary)]">
