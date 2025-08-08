@@ -32,7 +32,7 @@ export default async function ConceptArtPage({
     : null
 
   return (
-    <main className="container mx-auto min-h-screen p-8 flex flex-col gap-4">
+    <div className="p-8 flex flex-col gap-4">
       <Link href="/concept-art" className="back-link">
         ← Back to gallery
       </Link>
@@ -88,6 +88,6 @@ export default async function ConceptArtPage({
           </ReactMarkdown>
         </article>
       )}
-    </main>
+    </div>
   )
 }

@@ -25,7 +25,7 @@ export default async function ConceptArtList() {
   )
 
   return (
-    <main className="container mx-auto min-h-screen p-8">
+    <div className="p-8">
       <h1 className="text-4xl font-bold mb-8 text-[var(--color-cassowary)]">
         Concept Art Gallery
       </h1>
@@ -57,6 +57,6 @@ export default async function ConceptArtList() {
           )
         })}
       </ul>
-    </main>
+    </div>
   )
 }

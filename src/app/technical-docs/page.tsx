@@ -33,7 +33,7 @@ export default async function TechnicalDocumentIndexPage() {
   )
 
   return (
-    <main className="container mx-auto  p-8">
+    <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold text-[var(--color-cassowary)]">
           Technical Documents
@@ -81,6 +81,6 @@ export default async function TechnicalDocumentIndexPage() {
           )
         })}
       </ul>
-    </main>
+    </div>
   )
 }

@@ -32,7 +32,7 @@ export default async function TechnicalDocumentPage({
     : null
 
   return (
-    <main className="container mx-auto  p-8 flex flex-col gap-4">
+    <div className="p-8 flex flex-col gap-4">
       <Link href="/technical-docs" className="back-link">
         ← Back to documents
       </Link>
@@ -60,6 +60,6 @@ export default async function TechnicalDocumentPage({
           {doc.markdown}
         </ReactMarkdown>
       </article>
-    </main>
+    </div>
   )
 }

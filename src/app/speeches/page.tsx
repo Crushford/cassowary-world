@@ -16,7 +16,7 @@ export default async function SpeechesList() {
   )
 
   return (
-    <main className="container mx-auto  p-8">
+    <div className="p-8">
       <h1 className="text-4xl font-bold mb-8 text-[var(--color-cassowary)]">
         Speeches
       </h1>
@@ -35,6 +35,6 @@ export default async function SpeechesList() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   )
 }
