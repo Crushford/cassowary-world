@@ -35,16 +35,10 @@ export default async function TechnicalDocumentIndexPage() {
 
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8">
         <h1 className="text-4xl font-bold text-[var(--color-cassowary)]">
           Technical Documents
         </h1>
-        <Link
-          href="/technical-docs/compiled"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-        >
-          View Compiled Version
-        </Link>
       </div>
       <ul className="flex flex-col gap-y-4">
         {docs.map(doc => {

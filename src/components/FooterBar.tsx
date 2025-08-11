@@ -34,6 +34,18 @@ export default function FooterBar() {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <span>🤖</span>
+            <span>
+              Want to copy all this data for an LLM?{' '}
+              <Link
+                href="/technical-docs/compiled"
+                className="footer-link underline hover:text-[var(--color-lichen-gold)]"
+              >
+                Compile docs here
+              </Link>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
             <span>🎮</span>
             <span>
               If you like this, you might also like{' '}
