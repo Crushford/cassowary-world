@@ -33,7 +33,7 @@ export default async function TechnicalDocumentPage({
     : null
 
   return (
-    <div className="p-8 flex flex-col gap-4">
+    <div className="p-4 lg:p-8 flex flex-col gap-4">
       <Link href="/technical-docs" className="back-link">
         ← Back to documents
       </Link>
@@ -58,7 +58,7 @@ export default async function TechnicalDocumentPage({
         Published: {new Date(doc._createdAt).toLocaleDateString()}
       </p>
 
-      <article className="prose max-w-none mt-4">
+      <article className="prose max-w-none mt-4 px-0 lg:px-8">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {doc.markdown}
         </ReactMarkdown>
