@@ -203,20 +203,6 @@ h1 {
 
 /* ===== REUSABLE COMPONENT CLASSES ===== */
 
-/* Sidebar styling */
-.sidebar {
-  @apply shadow-lg border-r border-solid;
-  background-color: var(--background);
-  border-color: var(--color-leaf-shadow);
-}
-
-/* Mobile sidebar overlay */
-@media (max-width: 1023px) {
-  .sidebar {
-    @apply bg-[var(--background)] backdrop-blur-sm;
-  }
-}
-
 /* Card styling */
 .card {
   @apply rounded-lg shadow-sm border border-solid p-6 transition-all duration-200;
@@ -287,4 +273,17 @@ h1 {
 
 .placeholder-box p {
   color: var(--color-leaf-shadow);
+}
+
+/* Collapse the sidebar when <details> is closed */
+details:not([open]) {
+  width: 0;
+  overflow: hidden;
+}
+
+/* Desktop: hide the summary toggle */
+@media (min-width: 1024px) {
+  details > summary {
+    display: none;
+  }
 }

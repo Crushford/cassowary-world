@@ -6,7 +6,7 @@ import {
 } from 'next/font/google'
 import './globals.css'
 import FooterBar from '@/components/FooterBar'
-import Sidebar from '@/components/Sidebar'
+import SidebarAutoHide from './SidebarAutoHide'
 import Link from 'next/link'
 
 const playfair = Playfair_Display({
@@ -42,15 +42,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'Cassowary World Team' }],
   creator: 'Cassowary World',
   publisher: 'Cassowary World',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false
-  },
+  formatDetection: { email: false, address: false, telephone: false },
   metadataBase: new URL('https://cassowary-world.com'),
-  alternates: {
-    canonical: '/'
-  },
+  alternates: { canonical: '/' },
   openGraph: {
     title: 'Cassowary World',
     description:
@@ -78,7 +72,7 @@ export const metadata: Metadata = {
   }
 }
 
-// Document categories - easily extensible for future document types
+// Document categories
 const documentCategories = [
   {
     id: 'technical',
@@ -104,32 +98,15 @@ const documentCategories = [
     href: '/concept-art',
     icon: '🎨'
   }
-  // Future categories can be added here:
-  // {
-  //   id: 'research',
-  //   name: 'Research Papers',
-  //   description: 'Academic research and scientific papers',
-  //   href: '/research',
-  //   icon: '📚'
-  // },
-  // {
-  //   id: 'user-guides',
-  //   name: 'User Guides',
-  //   description: 'User manuals and tutorials',
-  //   href: '/user-guides',
-  //   icon: '📖'
-  // }
 ]
 
 export default function RootLayout({
   children
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body
-        className={`${playfair.variable} ${crimson.variable} ${mono.variable} antialiased flex flex-col`}
+        className={`${playfair.variable} ${crimson.variable} ${mono.variable} antialiased flex min-h-screen flex-col`}
         style={{ backgroundColor: 'var(--background)' }}
       >
         {/* Header */}
@@ -149,13 +126,65 @@ export default function RootLayout({
           </div>
         </header>
 
-        {/* Main content area with sidebar */}
-        <div className="flex flex-1 flex-row">
-          {/* Left Sidebar */}
-          <Sidebar documentCategories={documentCategories} />
+        <SidebarAutoHide />
 
-          {/* Main Content */}
-          <main className="flex-1 lg:ml-0">{children}</main>
+        {/* Main with native <details> sidebar */}
+        <div className="flex flex-1 flex-row">
+          <details
+            id="sidebar"
+            className="group w-[280px] border-r border-solid shadow-lg lg:relative h-screen overflow-y-auto"
+            open
+          >
+            <summary className="hidden" />
+            {/* Mobile: emoji-only nav */}
+            <nav className="lg:hidden flex flex-col gap-2 p-2">
+              {documentCategories.map(c => (
+                <Link
+                  key={c.id}
+                  href={c.href}
+                  className="category-card px-2 py-1 text-2xl flex justify-center"
+                  title={c.name}
+                >
+                  {c.icon}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Desktop: full cards */}
+            <div className="hidden lg:block p-6">
+              <h2
+                className="text-2xl font-bold mb-6"
+                style={{ color: 'var(--color-cassowary)' }}
+              >
+                Document Categories
+              </h2>
+              <nav className="space-y-3">
+                {documentCategories.map(c => (
+                  <Link
+                    key={c.id}
+                    href={c.href}
+                    className="category-card block"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">{c.icon}</span>
+                      <div>
+                        <h3 className="font-semibold text-lg">{c.name}</h3>
+                        <p className="text-sm opacity-90">{c.description}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </details>
+
+          {/* Content: padding collapses when sidebar is closed */}
+          <main
+            id="main"
+            className="flex-1 lg:ml-0 transition-all duration-200 pl-4 group-[details:not([open])]:pl-0"
+          >
+            {children}
+          </main>
         </div>
 
         <FooterBar />
