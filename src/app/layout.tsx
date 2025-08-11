@@ -149,17 +149,34 @@ export default function RootLayout({
         </header>
 
         {/* Main content area with sidebar */}
-        <div className="flex flex-1">
+        <div className="flex flex-1 flex-row">
           {/* Left Sidebar */}
-          <aside className="sidebar">
-            <div className="p-6">
+          <aside className="sidebar lg:w-80 shadow-lg border-r border-solid">
+            <div className="p-2 lg:p-6">
+              {/* Desktop heading - hidden on mobile */}
               <h2
-                className="text-2xl font-bold mb-6"
+                className="hidden lg:block text-2xl font-bold mb-6"
                 style={{ color: 'var(--color-cassowary)' }}
               >
                 Document Categories
               </h2>
-              <nav className="space-y-3">
+
+              {/* Mobile navigation - emojis only */}
+              <nav className="lg:hidden flex flex-col space-y-2">
+                {documentCategories.map(category => (
+                  <Link
+                    key={category.id}
+                    href={category.href}
+                    className="category-card px-1 py-1 text-xl flex justify-center"
+                    title={category.name}
+                  >
+                    {category.icon}
+                  </Link>
+                ))}
+              </nav>
+
+              {/* Desktop navigation - full cards */}
+              <nav className="hidden lg:block space-y-3">
                 {documentCategories.map(category => (
                   <Link
                     key={category.id}
