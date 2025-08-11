@@ -6,6 +6,7 @@ import {
 } from 'next/font/google'
 import './globals.css'
 import FooterBar from '@/components/FooterBar'
+import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 
 const playfair = Playfair_Display({
@@ -151,57 +152,10 @@ export default function RootLayout({
         {/* Main content area with sidebar */}
         <div className="flex flex-1 flex-row">
           {/* Left Sidebar */}
-          <aside className="sidebar lg:w-80 shadow-lg border-r border-solid">
-            <div className="p-2 lg:p-6">
-              {/* Desktop heading - hidden on mobile */}
-              <h2
-                className="hidden lg:block text-2xl font-bold mb-6"
-                style={{ color: 'var(--color-cassowary)' }}
-              >
-                Document Categories
-              </h2>
-
-              {/* Mobile navigation - emojis only */}
-              <nav className="lg:hidden flex flex-col space-y-2">
-                {documentCategories.map(category => (
-                  <Link
-                    key={category.id}
-                    href={category.href}
-                    className="category-card px-1 py-1 text-xl flex justify-center"
-                    title={category.name}
-                  >
-                    {category.icon}
-                  </Link>
-                ))}
-              </nav>
-
-              {/* Desktop navigation - full cards */}
-              <nav className="hidden lg:block space-y-3">
-                {documentCategories.map(category => (
-                  <Link
-                    key={category.id}
-                    href={category.href}
-                    className="category-card"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{category.icon}</span>
-                      <div>
-                        <h3 className="font-semibold text-lg">
-                          {category.name}
-                        </h3>
-                        <p className="text-sm opacity-90">
-                          {category.description}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </nav>
-            </div>
-          </aside>
+          <Sidebar documentCategories={documentCategories} />
 
           {/* Main Content */}
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 lg:ml-0">{children}</main>
         </div>
 
         <FooterBar />

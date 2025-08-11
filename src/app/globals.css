@@ -210,6 +210,13 @@ h1 {
   border-color: var(--color-leaf-shadow);
 }
 
+/* Mobile sidebar overlay */
+@media (max-width: 1023px) {
+  .sidebar {
+    @apply bg-[var(--background)] backdrop-blur-sm;
+  }
+}
+
 /* Card styling */
 .card {
   @apply rounded-lg shadow-sm border border-solid p-6 transition-all duration-200;
