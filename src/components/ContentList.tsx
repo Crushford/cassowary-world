@@ -24,15 +24,11 @@ interface TechnicalDocItem extends BaseContentItem {
   image?: SanityImageSource
 }
 
-interface SpeechItem extends BaseContentItem {
-  // No additional fields needed
-}
-
 interface ConceptArtItem extends BaseContentItem {
   headerImage?: SanityImageSource
 }
 
-type ContentItem = TechnicalDocItem | SpeechItem | ConceptArtItem
+type ContentItem = TechnicalDocItem | ConceptArtItem
 
 interface ContentListProps {
   title: string
@@ -71,8 +67,6 @@ export default function ContentList({
 
   const containerClasses =
     layout === 'grid' ? 'grid md:grid-cols-2 gap-6' : 'flex flex-col gap-y-4'
-
-  const itemClasses = layout === 'grid' ? 'doc-list-item' : 'doc-list-item'
 
   return (
     <div className="p-8">
