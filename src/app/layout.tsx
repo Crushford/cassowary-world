@@ -132,20 +132,20 @@ export default function RootLayout({
         <div className="flex flex-1 flex-row">
           <details
             id="sidebar"
-            className="group w-[280px] border-r border-solid shadow-lg lg:relative h-screen overflow-y-auto"
+            className="group w-[100px] border-r border-solid shadow-lg lg:relative h-screen overflow-y-auto"
             open
           >
             <summary className="hidden" />
-            {/* Mobile: emoji-only nav */}
+            {/* Mobile: text-only nav */}
             <nav className="lg:hidden flex flex-col gap-2 p-2">
               {documentCategories.map(c => (
                 <Link
                   key={c.id}
                   href={c.href}
-                  className="category-card px-2 py-1 text-2xl flex justify-center"
+                  className="rounded-lg transition-all duration-200 text-white shadow-sm hover:shadow-md transform hover:-translate-y-0.5 bg-[var(--color-cassowary)] hover:bg-[var(--color-bird-blue)] w-20 h-12 text-sm flex justify-center items-center font-medium text-center leading-tight"
                   title={c.name}
                 >
-                  {c.icon}
+                  {c.name}
                 </Link>
               ))}
             </nav>

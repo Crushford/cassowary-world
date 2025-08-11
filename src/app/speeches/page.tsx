@@ -1,6 +1,12 @@
 import { type SanityDocument } from 'next-sanity'
 import { client } from '@/sanity/client'
-import Link from 'next/link'
+import ContentList from '@/components/ContentList'
+
+interface Speech extends SanityDocument {
+  title: string
+  slug: { current: string }
+  _createdAt: string
+}
 
 const SPEECHES_LIST_QUERY = `*[_type == "speech"] | order(_createdAt desc) {
   title, slug, _createdAt
@@ -9,32 +15,19 @@ const SPEECHES_LIST_QUERY = `*[_type == "speech"] | order(_createdAt desc) {
 const options = { next: { revalidate: 30 } }
 
 export default async function SpeechesList() {
-  const speeches = await client.fetch<SanityDocument[]>(
+  const speeches = await client.fetch<Speech[]>(
     SPEECHES_LIST_QUERY,
     {},
     options
   )
 
   return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold mb-8 text-[var(--color-cassowary)]">
-        Speeches
-      </h1>
-      <ul className="space-y-4">
-        {speeches.map(speech => (
-          <li key={speech.slug.current} className="doc-list-item">
-            <Link
-              className="doc-link"
-              href={`/speeches/${speech.slug.current}`}
-            >
-              <h2 className="text-2xl font-semibold">{speech.title}</h2>
-              <p className="text-sm text-[var(--color-bird-blue)]">
-                {new Date(speech._createdAt).toLocaleDateString()}
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ContentList
+      title="Speeches"
+      items={speeches}
+      basePath="/speeches"
+      layout="list"
+      showThumbnails={false}
+    />
   )
 }
