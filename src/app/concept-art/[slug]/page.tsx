@@ -62,7 +62,7 @@ export default async function ConceptArtPage({
             alt={doc.title}
             fill
             className="object-cover rounded-xl"
-            sizes="(max-width: 768px) 100vw, 800px"
+            sizes="(max-width: 768px) 80vw, (max-width: 1024px) 80vw, 800px"
           />
         </div>
       )}
@@ -81,9 +81,10 @@ export default async function ConceptArtPage({
             Gallery
           </h2>
           <ImageGallery
-            images={doc.images.map((entry: ConceptArtImage) => ({
+            images={doc.images.map((entry: ConceptArtImage, index: number) => ({
               url: urlFor(entry.image)?.width(800).url() || '',
-              alt: entry.caption || 'Concept Art'
+              alt: entry.caption || 'Concept Art',
+              id: `${doc._id}-${index}`
             }))}
           />
 
