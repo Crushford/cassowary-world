@@ -14,6 +14,7 @@ interface SanityImage {
   alt?: string
   width?: number
   height?: number
+  id?: string
 }
 
 export default function ImageGallery({ images }: { images: SanityImage[] }) {
@@ -25,7 +26,7 @@ export default function ImageGallery({ images }: { images: SanityImage[] }) {
     >
       {images.map((image, index) => (
         <a
-          key={index}
+          key={image.id || index}
           href={image.url}
           className="overflow-hidden rounded-lg group relative block"
         >
