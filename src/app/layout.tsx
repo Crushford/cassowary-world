@@ -132,7 +132,7 @@ export default function RootLayout({
         <div className="flex flex-1 flex-row">
           <details
             id="sidebar"
-            className="group w-[100px] md:w-[300px] border-r border-solid shadow-lg lg:relative h-screen overflow-y-auto"
+            className="group w-[100px] md:w-[300px] border-r border-solid shadow-lg lg:relative  overflow-y-auto"
             open
           >
             <summary className="hidden" />
