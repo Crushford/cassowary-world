@@ -20,20 +20,8 @@ export default async function TechnicalDocumentPage({
   )
 
   return (
-    <div className="p-4 lg:p-8 flex flex-col gap-4">
-      <Link href="/technical-docs" className="back-link">
-        ← Back to documents
-      </Link>
-
-      <h1 className="text-4xl font-bold mb-2 text-[var(--color-cassowary)]">
-        {doc.title}
-      </h1>
-
-      <p className="text-sm text-[var(--color-bird-blue)]">
-        Published: {new Date(doc._createdAt).toLocaleDateString()}
-      </p>
-
-      <article className="prose max-w-none mt-4 px-0 lg:px-8">
+    <div className="p-1  flex flex-col gap-4">
+      <article className="prose">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {doc.markdown}
         </ReactMarkdown>

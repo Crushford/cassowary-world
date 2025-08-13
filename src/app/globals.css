@@ -20,7 +20,7 @@ body {
 
 /* Container for rendered markdown */
 .prose {
-  @apply mx-auto p-8 leading-relaxed text-base rounded-xl shadow-md border border-solid;
+  @apply leading-relaxed text-base;
   background-color: var(--background);
   border-color: var(--color-leaf-shadow);
   color: var(--foreground);
