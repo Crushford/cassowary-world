@@ -6,7 +6,6 @@ import {
 } from 'next/font/google'
 import './globals.css'
 import FooterBar from '@/components/FooterBar'
-import SidebarAutoHide from './SidebarAutoHide'
 import Link from 'next/link'
 
 const playfair = Playfair_Display({
@@ -114,78 +113,36 @@ export default function RootLayout({
           className="border-b border-solid"
           style={{ borderColor: 'var(--color-leaf-shadow)' }}
         >
-          <div className="p-6">
+          <div className="p-6 text-center">
             <Link href="/" className="inline-block">
               <h1
-                className="text-4xl font-bold hover:opacity-80 transition-opacity duration-200"
+                className="text-4xl font-bold hover:opacity-80 transition-opacity duration-200 mb-6"
                 style={{ color: 'var(--color-cassowary)' }}
               >
-                Cassowary World
+                The Cassowary Review
               </h1>
             </Link>
-          </div>
-        </header>
 
-        <SidebarAutoHide />
-
-        {/* Main with native <details> sidebar */}
-        <div className="flex flex-1 flex-row">
-          <details
-            id="sidebar"
-            className="group w-[100px] md:w-[300px] border-r border-solid shadow-lg lg:relative  overflow-y-auto"
-            open
-          >
-            <summary className="hidden" />
-            {/* Mobile: text-only nav */}
-            <nav className="lg:hidden flex flex-col gap-2 p-2">
+            {/* Navigation Menu */}
+            <nav className="flex flex-wrap justify-center gap-4">
               {documentCategories.map(c => (
                 <Link
                   key={c.id}
                   href={c.href}
-                  className="rounded-lg transition-all duration-200 text-white shadow-sm hover:shadow-md transform hover:-translate-y-0.5 bg-[var(--color-cassowary)] hover:bg-[var(--color-bird-blue)] w-20 h-12 text-sm flex justify-center items-center font-medium text-center leading-tight"
-                  title={c.name}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 text-white shadow-sm hover:shadow-md transform hover:-translate-y-0.5 bg-[var(--color-cassowary)] hover:bg-[var(--color-bird-blue)] font-medium"
                 >
-                  {c.name}
+                  <span className="text-lg">{c.icon}</span>
+                  <span>{c.name}</span>
                 </Link>
               ))}
             </nav>
+          </div>
+        </header>
 
-            {/* Desktop: full cards */}
-            <div className="hidden lg:block p-6">
-              <h2
-                className="text-2xl font-bold mb-6"
-                style={{ color: 'var(--color-cassowary)' }}
-              >
-                Document Categories
-              </h2>
-              <nav className="space-y-3">
-                {documentCategories.map(c => (
-                  <Link
-                    key={c.id}
-                    href={c.href}
-                    className="category-card block"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{c.icon}</span>
-                      <div>
-                        <h3 className="font-semibold text-lg">{c.name}</h3>
-                        <p className="text-sm opacity-90">{c.description}</p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </nav>
-            </div>
-          </details>
-
-          {/* Content: padding collapses when sidebar is closed */}
-          <main
-            id="main"
-            className="flex-1 lg:ml-0 transition-all duration-200 pl-4 group-[details:not([open])]:pl-0"
-          >
-            {children}
-          </main>
-        </div>
+        {/* Main Content */}
+        <main className="flex-1 flex justify-center">
+          <div className="w-full max-w-4xl px-6">{children}</div>
+        </main>
 
         <FooterBar />
       </body>
