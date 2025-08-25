@@ -81,9 +81,6 @@ export default async function HomePage() {
     client.fetch<ConceptArt[]>(CONCEPT_ART_QUERY, {}, options)
   ])
 
-  // Debug logging for speeches
-  console.log('Speeches data:', JSON.stringify(speeches, null, 2))
-
   // Combine all content and shuffle the order
   const allContent = [
     ...technicalDocs.map(doc => ({
@@ -106,7 +103,26 @@ export default async function HomePage() {
   // Get the featured article (first one) and remaining articles
   const [featuredArticle, ...remainingArticles] = allContent
 
-  const getImageUrl = (item: any) => {
+  // Type for content items with type and category
+  interface ContentItemWithType {
+    _id: string
+    title: string
+    slug: { current: string }
+    _createdAt: string
+    type: string
+    category: string
+    image?: SanityImageSource
+    headerImage?: SanityImageSource
+    markdown?: string
+    images?: Array<{
+      image: SanityImageSource
+      caption?: string
+      tags?: string[]
+    }>
+    description?: string
+  }
+
+  const getImageUrl = (item: ContentItemWithType) => {
     // For concept art, use the first image from the images array
     if (item.type === 'concept-art' && item.images && item.images.length > 0) {
       return urlFor(item.images[0].image)?.width(800).height(600).url()
@@ -122,7 +138,7 @@ export default async function HomePage() {
     return null
   }
 
-  const getDescription = (item: any) => {
+  const getDescription = (item: ContentItemWithType) => {
     if (item.type === 'concept-art' && item.description) {
       return item.description
     }
@@ -136,7 +152,7 @@ export default async function HomePage() {
     return null
   }
 
-  const getPath = (item: any) => {
+  const getPath = (item: ContentItemWithType) => {
     switch (item.type) {
       case 'technical':
         return `/technical-docs/${item.slug.current}`
@@ -194,7 +210,7 @@ export default async function HomePage() {
 
       {/* Article Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {remainingArticles.map((article, index) => (
+        {remainingArticles.map(article => (
           <Link
             key={article._id}
             href={getPath(article)}

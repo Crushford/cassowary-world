@@ -100,7 +100,7 @@ const documentCategories = [
 ]
 
 // Ad component with Google AdSense standard sizes
-function AdBanner({ size, position }: { size: string; position: string }) {
+function AdBanner({ size }: { size: string; position?: string }) {
   const adStyles = {
     '728x90':
       'w-full h-[90px] bg-gray-100 border border-gray-300 flex items-center justify-center',
