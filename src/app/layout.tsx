@@ -6,7 +6,6 @@ import {
 } from 'next/font/google'
 import './globals.css'
 import FooterBar from '@/components/FooterBar'
-import SidebarAutoHide from './SidebarAutoHide'
 import Link from 'next/link'
 
 const playfair = Playfair_Display({
@@ -100,6 +99,44 @@ const documentCategories = [
   }
 ]
 
+// Ad component with Google AdSense standard sizes
+function AdBanner({ size }: { size: string; position?: string }) {
+  const adStyles = {
+    '728x90':
+      'w-full h-[90px] bg-gray-100 border border-gray-300 flex items-center justify-center',
+    '300x250':
+      'w-[300px] h-[250px] bg-gray-100 border border-gray-300 flex items-center justify-center',
+    '300x600':
+      'w-[300px] h-[600px] bg-gray-100 border border-gray-300 flex items-center justify-center',
+    '160x600':
+      'w-[160px] h-[600px] bg-gray-100 border border-gray-300 flex items-center justify-center',
+    '320x50':
+      'w-full h-[50px] bg-gray-100 border border-gray-300 flex items-center justify-center',
+    '970x90':
+      'w-full h-[90px] bg-gray-100 border border-gray-300 flex items-center justify-center',
+    '970x250':
+      'w-full h-[250px] bg-gray-100 border border-gray-300 flex items-center justify-center'
+  }
+
+  const demoContent = {
+    '728x90': 'Google AdSense - 728x90 Leaderboard',
+    '300x250': 'Google AdSense - 300x250 Medium Rectangle',
+    '300x600': 'Google AdSense - 300x600 Half Page',
+    '160x600': 'Google AdSense - 160x600 Wide Skyscraper',
+    '320x50': 'Google AdSense - 320x50 Mobile Banner',
+    '970x90': 'Google AdSense - 970x90 Large Leaderboard',
+    '970x250': 'Google AdSense - 970x250 Billboard'
+  }
+
+  return (
+    <div
+      className={`${adStyles[size as keyof typeof adStyles]} text-gray-600 text-sm font-medium`}
+    >
+      {demoContent[size as keyof typeof demoContent]}
+    </div>
+  )
+}
+
 export default function RootLayout({
   children
 }: Readonly<{ children: React.ReactNode }>) {
@@ -114,77 +151,64 @@ export default function RootLayout({
           className="border-b border-solid"
           style={{ borderColor: 'var(--color-leaf-shadow)' }}
         >
-          <div className="p-6">
+          <div className="p-6 text-center">
             <Link href="/" className="inline-block">
               <h1
-                className="text-4xl font-bold hover:opacity-80 transition-opacity duration-200"
+                className="text-4xl font-bold hover:opacity-80 transition-opacity duration-200 mb-6"
                 style={{ color: 'var(--color-cassowary)' }}
               >
-                Cassowary World
+                The Cassowary Review
               </h1>
             </Link>
-          </div>
-        </header>
 
-        <SidebarAutoHide />
-
-        {/* Main with native <details> sidebar */}
-        <div className="flex flex-1 flex-row">
-          <details
-            id="sidebar"
-            className="group w-[100px] md:w-[300px] border-r border-solid shadow-lg lg:relative  overflow-y-auto"
-            open
-          >
-            <summary className="hidden" />
-            {/* Mobile: text-only nav */}
-            <nav className="lg:hidden flex flex-col gap-2 p-2">
+            {/* Navigation Menu */}
+            <nav className="flex flex-wrap justify-center gap-4">
               {documentCategories.map(c => (
                 <Link
                   key={c.id}
                   href={c.href}
-                  className="rounded-lg transition-all duration-200 text-white shadow-sm hover:shadow-md transform hover:-translate-y-0.5 bg-[var(--color-cassowary)] hover:bg-[var(--color-bird-blue)] w-20 h-12 text-sm flex justify-center items-center font-medium text-center leading-tight"
-                  title={c.name}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 text-white shadow-sm hover:shadow-md transform hover:-translate-y-0.5 bg-[var(--color-cassowary)] hover:bg-[var(--color-bird-blue)] font-medium"
                 >
-                  {c.name}
+                  <span className="text-lg">{c.icon}</span>
+                  <span>{c.name}</span>
                 </Link>
               ))}
             </nav>
+          </div>
 
-            {/* Desktop: full cards */}
-            <div className="hidden lg:block p-6">
-              <h2
-                className="text-2xl font-bold mb-6"
-                style={{ color: 'var(--color-cassowary)' }}
-              >
-                Document Categories
-              </h2>
-              <nav className="space-y-3">
-                {documentCategories.map(c => (
-                  <Link
-                    key={c.id}
-                    href={c.href}
-                    className="category-card block"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{c.icon}</span>
-                      <div>
-                        <h3 className="font-semibold text-lg">{c.name}</h3>
-                        <p className="text-sm opacity-90">{c.description}</p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </nav>
+          {/* Top Banner Ad */}
+          <div className="w-full bg-white border-t border-gray-200">
+            <div className="max-w-4xl mx-auto py-2">
+              <AdBanner size="728x90" position="top" />
             </div>
-          </details>
+          </div>
+        </header>
 
-          {/* Content: padding collapses when sidebar is closed */}
-          <main
-            id="main"
-            className="flex-1 lg:ml-0 transition-all duration-200 pl-4 group-[details:not([open])]:pl-0"
-          >
-            {children}
-          </main>
+        {/* Main Layout with Sidebars */}
+        <div className="flex flex-1 max-w-7xl mx-auto">
+          {/* Left Sidebar Ad */}
+          <div className="hidden lg:block w-[160px] flex-shrink-0 p-4">
+            <div className="sticky top-4">
+              <AdBanner size="160x600" position="left" />
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <main className="flex-1 px-6">{children}</main>
+
+          {/* Right Sidebar Ad */}
+          <div className="hidden xl:block w-[300px] flex-shrink-0 p-4">
+            <div className="sticky top-4">
+              <AdBanner size="300x600" position="right" />
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Banner Ad */}
+        <div className="w-full bg-white border-t border-gray-200 mt-8">
+          <div className="max-w-7xl mx-auto py-4">
+            <AdBanner size="970x250" position="bottom" />
+          </div>
         </div>
 
         <FooterBar />

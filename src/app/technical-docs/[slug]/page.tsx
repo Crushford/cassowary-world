@@ -1,6 +1,5 @@
 import { type SanityDocument } from 'next-sanity'
 import { client } from '@/sanity/client'
-import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
