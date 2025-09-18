@@ -119,7 +119,7 @@ export default function RootLayout({
                 className="text-4xl font-bold hover:opacity-80 transition-opacity duration-200 mb-6"
                 style={{ color: 'var(--color-cassowary)' }}
               >
-                The Cassowary Review
+                Cassowary World
               </h1>
             </Link>
 
