@@ -15,32 +15,61 @@ const ALL_TECHNICAL_DOCS_QUERY = `*[
   markdown
 }`
 
+// Query to fetch all secret technical documents with their content
+const ALL_SECRET_TECHNICAL_DOCS_QUERY = `*[
+  _type == "secretTechnicalDocument"
+  && defined(slug.current)
+]|order(_createdAt asc){
+  _id,
+  title,
+  slug,
+  _createdAt,
+  markdown
+}`
+
 const options = { next: { revalidate: 30 } }
 
 export default async function CompiledTechnicalDocsPage() {
-  const docs = await client.fetch<SanityDocument[]>(
-    ALL_TECHNICAL_DOCS_QUERY,
-    {},
-    options
+  const [docs, secretDocs] = await Promise.all([
+    client.fetch<SanityDocument[]>(ALL_TECHNICAL_DOCS_QUERY, {}, options),
+    client.fetch<SanityDocument[]>(ALL_SECRET_TECHNICAL_DOCS_QUERY, {}, options)
+  ])
+
+  // Combine regular and secret documents
+  const allDocs = [...docs, ...secretDocs].sort(
+    (a, b) =>
+      new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime()
   )
 
   // Compile all documents into a single text
-  const compiledContent = docs
+  const compiledContent = allDocs
     .map(doc => {
       const date = new Date(doc._createdAt).toLocaleDateString()
-      return `# ${doc.title}\n\n**Published:** ${date}\n**Document ID:** ${doc._id}\n\n${doc.markdown}\n\n---\n\n`
+      const docType = secretDocs.some(sd => sd._id === doc._id)
+        ? 'Secret Technical Document'
+        : 'Technical Document'
+      return `# ${doc.title}\n\n**Type:** ${docType}\n**Published:** ${date}\n**Document ID:** ${doc._id}\n\n${doc.markdown}\n\n---\n\n`
     })
     .join('')
 
   return (
     <div className="p-8">
       <div className="mb-8">
-        <Link
-          href="/technical-docs"
-          className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
-        >
-          ← Back to documents
-        </Link>
+        <div className="flex gap-4 mb-4">
+          <Link
+            href="/technical-docs"
+            className="text-blue-600 hover:text-blue-800 inline-block"
+          >
+            ← Back to documents
+          </Link>
+          <span className="text-gray-400">|</span>
+          <Link
+            href="/secret-technical-docs"
+            className="text-blue-600 hover:text-blue-800 inline-block"
+          >
+            View Secret Documents →
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold mb-4 text-[var(--color-cassowary)]">
           Compiled Technical Documents
         </h1>
@@ -55,7 +84,8 @@ export default async function CompiledTechnicalDocsPage() {
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
           />
           <div className="text-sm text-gray-500 flex items-center">
-            {docs.length} documents • {compiledContent.length} characters
+            {docs.length} regular + {secretDocs.length} secret ={' '}
+            {allDocs.length} documents • {compiledContent.length} characters
           </div>
         </div>
       </div>
@@ -82,20 +112,32 @@ export default async function CompiledTechnicalDocsPage() {
           Document Summary
         </h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {docs.map(doc => (
-            <div
-              key={doc._id}
-              className="bg-gray-50 border border-gray-200 rounded-lg p-4"
-            >
-              <h4 className="font-semibold text-gray-800 mb-2">{doc.title}</h4>
-              <p className="text-sm text-gray-600 mb-2">
-                Published: {new Date(doc._createdAt).toLocaleDateString()}
-              </p>
-              <p className="text-sm text-gray-500">
-                {doc.markdown?.length || 0} characters
-              </p>
-            </div>
-          ))}
+          {allDocs.map(doc => {
+            const isSecret = secretDocs.some(sd => sd._id === doc._id)
+            return (
+              <div
+                key={doc._id}
+                className={`bg-gray-50 border rounded-lg p-4 ${
+                  isSecret ? 'border-amber-400 bg-amber-50' : 'border-gray-200'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="font-semibold text-gray-800">{doc.title}</h4>
+                  {isSecret && (
+                    <span className="px-2 py-0.5 text-xs font-semibold bg-amber-400 text-amber-900 rounded">
+                      SECRET
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600 mb-2">
+                  Published: {new Date(doc._createdAt).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {doc.markdown?.length || 0} characters
+                </p>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
