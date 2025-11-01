@@ -70,9 +70,11 @@ export default function ContentList({
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-bold mb-8 text-[var(--color-cassowary)]">
-        {title}
-      </h1>
+      {title && (
+        <h1 className="text-4xl font-bold mb-8 text-[var(--color-cassowary)]">
+          {title}
+        </h1>
+      )}
       <ul className={containerClasses}>
         {items.map(item => {
           const thumbnailUrl = getThumbnailUrl(item)
