@@ -1,53 +1,42 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
+import { getContentIndex, getContentDoc } from '@/lib/content'
 import Link from 'next/link'
 import CopyButton from '@/components/CopyButton'
 
-// Query to fetch all technical documents with their content
-const ALL_TECHNICAL_DOCS_QUERY = `*[
-  _type == "technicalDocument"
-  && defined(slug.current)
-]|order(_createdAt asc){
-  _id,
-  title,
-  slug,
-  _createdAt,
-  markdown
-}`
+interface DocMeta {
+  _id: string
+  title: string
+  slug: { current: string }
+  _createdAt: string
+}
 
-// Query to fetch all secret technical documents with their content
-const ALL_SECRET_TECHNICAL_DOCS_QUERY = `*[
-  _type == "secretTechnicalDocument"
-  && defined(slug.current)
-]|order(_createdAt asc){
-  _id,
-  title,
-  slug,
-  _createdAt,
-  markdown
-}`
+interface DocFull extends DocMeta {
+  markdown?: string
+}
 
-const options = { next: { revalidate: 30 } }
+export default function CompiledTechnicalDocsPage() {
+  const techMeta = getContentIndex<DocMeta>('technical-docs')
+  const secretMeta = getContentIndex<DocMeta>('secret-technical-docs')
 
-export default async function CompiledTechnicalDocsPage() {
-  const [docs, secretDocs] = await Promise.all([
-    client.fetch<SanityDocument[]>(ALL_TECHNICAL_DOCS_QUERY, {}, options),
-    client.fetch<SanityDocument[]>(ALL_SECRET_TECHNICAL_DOCS_QUERY, {}, options)
-  ])
+  const docs: (DocFull & { isSecret: boolean })[] = [
+    ...techMeta.map(m => ({
+      ...getContentDoc<DocFull>('technical-docs', m.slug.current)!,
+      isSecret: false
+    })),
+    ...secretMeta.map(m => ({
+      ...getContentDoc<DocFull>('secret-technical-docs', m.slug.current)!,
+      isSecret: true
+    }))
+  ]
+    .filter(Boolean)
+    .sort((a, b) => new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime())
 
-  // Combine regular and secret documents
-  const allDocs = [...docs, ...secretDocs].sort(
-    (a, b) =>
-      new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime()
-  )
+  const regularDocs = docs.filter(d => !d.isSecret)
+  const secretDocs = docs.filter(d => d.isSecret)
 
-  // Compile all documents into a single text
-  const compiledContent = allDocs
+  const compiledContent = docs
     .map(doc => {
       const date = new Date(doc._createdAt).toLocaleDateString()
-      const docType = secretDocs.some(sd => sd._id === doc._id)
-        ? 'Secret Technical Document'
-        : 'Technical Document'
+      const docType = doc.isSecret ? 'Secret Technical Document' : 'Technical Document'
       return `# ${doc.title}\n\n**Type:** ${docType}\n**Published:** ${date}\n**Document ID:** ${doc._id}\n\n${doc.markdown}\n\n---\n\n`
     })
     .join('')
@@ -84,8 +73,8 @@ export default async function CompiledTechnicalDocsPage() {
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
           />
           <div className="text-sm text-gray-500 flex items-center">
-            {docs.length} regular + {secretDocs.length} secret ={' '}
-            {allDocs.length} documents • {compiledContent.length} characters
+            {regularDocs.length} regular + {secretDocs.length} secret ={' '}
+            {docs.length} documents • {compiledContent.length} characters
           </div>
         </div>
       </div>
@@ -112,32 +101,29 @@ export default async function CompiledTechnicalDocsPage() {
           Document Summary
         </h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {allDocs.map(doc => {
-            const isSecret = secretDocs.some(sd => sd._id === doc._id)
-            return (
-              <div
-                key={doc._id}
-                className={`bg-gray-50 border rounded-lg p-4 ${
-                  isSecret ? 'border-amber-400 bg-amber-50' : 'border-gray-200'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <h4 className="font-semibold text-gray-800">{doc.title}</h4>
-                  {isSecret && (
-                    <span className="px-2 py-0.5 text-xs font-semibold bg-amber-400 text-amber-900 rounded">
-                      SECRET
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-600 mb-2">
-                  Published: {new Date(doc._createdAt).toLocaleDateString()}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {doc.markdown?.length || 0} characters
-                </p>
+          {docs.map(doc => (
+            <div
+              key={doc._id}
+              className={`bg-gray-50 border rounded-lg p-4 ${
+                doc.isSecret ? 'border-amber-400 bg-amber-50' : 'border-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="font-semibold text-gray-800">{doc.title}</h4>
+                {doc.isSecret && (
+                  <span className="px-2 py-0.5 text-xs font-semibold bg-amber-400 text-amber-900 rounded">
+                    SECRET
+                  </span>
+                )}
               </div>
-            )
-          })}
+              <p className="text-sm text-gray-600 mb-2">
+                Published: {new Date(doc._createdAt).toLocaleDateString()}
+              </p>
+              <p className="text-sm text-gray-500">
+                {doc.markdown?.length || 0} characters
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

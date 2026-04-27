@@ -1,25 +1,16 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
+import { getContentIndex } from '@/lib/content'
 import ContentList from '@/components/ContentList'
 
-interface Speech extends SanityDocument {
+interface Speech {
+  _id: string
   title: string
   slug: { current: string }
   _createdAt: string
 }
 
-const SPEECHES_LIST_QUERY = `*[_type == "speech"] | order(_createdAt desc) {
-  title, slug, _createdAt
-}`
-
-const options = { next: { revalidate: 30 } }
-
-export default async function SpeechesList() {
-  const speeches = await client.fetch<Speech[]>(
-    SPEECHES_LIST_QUERY,
-    {},
-    options
-  )
+export default function SpeechesList() {
+  const speeches = getContentIndex<Speech>('speeches')
+    .sort((a, b) => new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime())
 
   return (
     <ContentList

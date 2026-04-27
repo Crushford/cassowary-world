@@ -4,18 +4,18 @@
   "private": true,
   "packageManager": "yarn@1.22.0",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "node scripts/sync-images.mjs && next dev --turbopack",
+    "build": "node scripts/sync-images.mjs && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export-content": "node scripts/export-from-sanity.mjs",
+    "download-images": "node scripts/download-images.mjs"
   },
   "dependencies": {
-    "@sanity/image-url": "^1.1.0",
     "lg-thumbnail": "^1.2.1",
     "lg-zoom": "^1.3.0",
     "lightgallery": "^2.9.0-beta.1",
-    "next": "15.4.5",
-    "next-sanity": "^10.0.6",
+    "next": "15.5.15",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-markdown": "^10.1.0",

@@ -1,53 +1,36 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
-import imageUrlBuilder from '@sanity/image-url'
+import { getContentDoc } from '@/lib/content'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import ImageGallery from '@/components/ImageGallery'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
-// TypeScript interfaces for concept art data
 interface ConceptArtImage {
-  image: SanityImageSource
+  image: string | null
   caption?: string
   tags?: string[]
 }
 
-interface ConceptArtDocument extends SanityDocument {
+interface ConceptArtDocument {
+  _id: string
   title: string
   slug: { current: string }
-  headerImage?: SanityImageSource
+  headerImage?: string | null
   images?: ConceptArtImage[]
   description?: string
   _createdAt: string
 }
-
-const CONCEPT_ART_QUERY = `*[_type == "conceptArt" && slug.current == $slug][0]`
-const options = { next: { revalidate: 30 } }
-
-// Configure Sanity image builder
-const { projectId, dataset } = client.config()
-const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null
 
 export default async function ConceptArtPage({
   params
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const doc = await client.fetch<ConceptArtDocument>(
-    CONCEPT_ART_QUERY,
-    await params,
-    options
-  )
+  const { slug } = await params
+  const doc = getContentDoc<ConceptArtDocument>('concept-art', slug)
 
-  const headerUrl = doc.headerImage
-    ? urlFor(doc.headerImage)?.width(550).height(310).url()
-    : null
+  if (!doc) notFound()
 
   return (
     <div className="p-8 flex flex-col gap-4">
@@ -55,10 +38,10 @@ export default async function ConceptArtPage({
         ← Back to gallery
       </Link>
 
-      {headerUrl && (
+      {doc.headerImage && (
         <div className="relative w-full aspect-video rounded-xl border border-[var(--color-leaf-shadow)]">
           <Image
-            src={headerUrl}
+            src={doc.headerImage}
             alt={doc.title}
             fill
             className="object-cover rounded-xl"
@@ -81,16 +64,17 @@ export default async function ConceptArtPage({
             Gallery
           </h2>
           <ImageGallery
-            images={doc.images.map((entry: ConceptArtImage, index: number) => ({
-              url: urlFor(entry.image)?.width(800).url() || '',
-              alt: entry.caption || 'Concept Art',
-              id: `${doc._id}-${index}`
-            }))}
+            images={doc.images
+              .filter(entry => entry.image)
+              .map((entry, index) => ({
+                url: entry.image!,
+                alt: entry.caption || 'Concept Art',
+                id: `${doc._id}-${index}`
+              }))}
           />
 
-          {/* Display captions and tags below the gallery */}
           <div className="mt-6 space-y-4">
-            {doc.images.map((entry: ConceptArtImage, i: number) => (
+            {doc.images.map((entry, i) => (
               <div key={i} className="card">
                 {entry.caption && (
                   <p className="text-sm text-[var(--foreground)] mb-2">

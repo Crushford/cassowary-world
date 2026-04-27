@@ -1,30 +1,25 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
+import { getContentIndex, getContentDoc } from '@/lib/content'
 import Link from 'next/link'
 import CopyButton from '@/components/CopyButton'
 
-// Query to fetch all secret technical documents with their content
-const ALL_SECRET_TECHNICAL_DOCS_QUERY = `*[
-  _type == "secretTechnicalDocument"
-  && defined(slug.current)
-]|order(_createdAt asc){
-  _id,
-  title,
-  slug,
-  _createdAt,
-  markdown
-}`
+interface DocMeta {
+  _id: string
+  title: string
+  slug: { current: string }
+  _createdAt: string
+}
 
-const options = { next: { revalidate: 30 } }
+interface DocFull extends DocMeta {
+  markdown?: string
+}
 
-export default async function CompiledSecretTechnicalDocsPage() {
-  const docs = await client.fetch<SanityDocument[]>(
-    ALL_SECRET_TECHNICAL_DOCS_QUERY,
-    {},
-    options
-  )
+export default function CompiledSecretTechnicalDocsPage() {
+  const meta = getContentIndex<DocMeta>('secret-technical-docs')
+  const docs = meta
+    .map(m => getContentDoc<DocFull>('secret-technical-docs', m.slug.current)!)
+    .filter(Boolean)
+    .sort((a, b) => new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime())
 
-  // Compile all documents into a single text
   const compiledContent = docs
     .map(doc => {
       const date = new Date(doc._createdAt).toLocaleDateString()
@@ -115,4 +110,3 @@ export default async function CompiledSecretTechnicalDocsPage() {
     </div>
   )
 }
-

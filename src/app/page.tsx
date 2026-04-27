@@ -1,152 +1,78 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
+import { getContentIndex } from '@/lib/content'
 import Link from 'next/link'
 import Image from 'next/image'
-import imageUrlBuilder from '@sanity/image-url'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
-// Configure Sanity image builder
-const { projectId, dataset } = client.config()
-const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null
-
-// Interfaces for different content types
-interface TechnicalDoc extends SanityDocument {
+interface TechnicalDoc {
+  _id: string
   title: string
   slug: { current: string }
   _createdAt: string
-  image?: SanityImageSource
-  headerImage?: SanityImageSource
+  image?: string | null
+  headerImage?: string | null
   markdown?: string
 }
 
-interface Speech extends SanityDocument {
+interface Speech {
+  _id: string
   title: string
   slug: { current: string }
   _createdAt: string
-  headerImage?: SanityImageSource
+  headerImage?: string | null
   markdown?: string
 }
 
-interface ConceptArt extends SanityDocument {
+interface ConceptArt {
+  _id: string
   title: string
   slug: { current: string }
+  _createdAt: string
   images?: Array<{
-    image: SanityImageSource
+    image: string | null
     caption?: string
     tags?: string[]
   }>
-  _createdAt: string
   description?: string
 }
 
-// Queries for fetching content
-const TECHNICAL_DOCS_QUERY = `*[_type == "technicalDocument" && defined(slug.current)] | order(_createdAt desc)[0...3] {
-  _id,
-  title,
-  slug,
-  _createdAt,
-  image,
-  headerImage,
-  markdown
-}`
+type ContentItemWithType =
+  | (TechnicalDoc & { type: 'technical'; category: string })
+  | (Speech & { type: 'speech'; category: string })
+  | (ConceptArt & { type: 'concept-art'; category: string })
 
-const SPEECHES_QUERY = `*[_type == "speech"] | order(_createdAt desc)[0...2] {
-  _id,
-  title,
-  slug,
-  _createdAt,
-  headerImage,
-  markdown
-}`
+export default function HomePage() {
+  const technicalDocs = getContentIndex<TechnicalDoc>('technical-docs')
+    .sort((a, b) => new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime())
+    .slice(0, 3)
 
-const CONCEPT_ART_QUERY = `*[_type == "conceptArt"] | order(_createdAt desc)[0...2] {
-  _id,
-  title,
-  slug,
-  images,
-  _createdAt,
-  description
-}`
+  const speeches = getContentIndex<Speech>('speeches')
+    .sort((a, b) => new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime())
+    .slice(0, 2)
 
-const options = { next: { revalidate: 30 } }
+  const conceptArt = getContentIndex<ConceptArt>('concept-art')
+    .sort((a, b) => new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime())
+    .slice(0, 2)
 
-export default async function HomePage() {
-  // Fetch content from all categories
-  const [technicalDocs, speeches, conceptArt] = await Promise.all([
-    client.fetch<TechnicalDoc[]>(TECHNICAL_DOCS_QUERY, {}, options),
-    client.fetch<Speech[]>(SPEECHES_QUERY, {}, options),
-    client.fetch<ConceptArt[]>(CONCEPT_ART_QUERY, {}, options)
-  ])
-
-  // Combine all content and shuffle the order
-  const allContent = [
-    ...technicalDocs.map(doc => ({
-      ...doc,
-      type: 'technical',
-      category: 'TECHNICAL'
-    })),
-    ...speeches.map(speech => ({
-      ...speech,
-      type: 'speech',
-      category: 'SPEECHES'
-    })),
-    ...conceptArt.map(art => ({
-      ...art,
-      type: 'concept-art',
-      category: 'CONCEPT ART'
-    }))
+  const allContent: ContentItemWithType[] = [
+    ...technicalDocs.map(doc => ({ ...doc, type: 'technical' as const, category: 'TECHNICAL' })),
+    ...speeches.map(speech => ({ ...speech, type: 'speech' as const, category: 'SPEECHES' })),
+    ...conceptArt.map(art => ({ ...art, type: 'concept-art' as const, category: 'CONCEPT ART' }))
   ].sort(() => Math.random() - 0.5)
 
-  // Get the featured article (first one) and remaining articles
   const [featuredArticle, ...remainingArticles] = allContent
 
-  // Type for content items with type and category
-  interface ContentItemWithType {
-    _id: string
-    title: string
-    slug: { current: string }
-    _createdAt: string
-    type: string
-    category: string
-    image?: SanityImageSource
-    headerImage?: SanityImageSource
-    markdown?: string
-    images?: Array<{
-      image: SanityImageSource
-      caption?: string
-      tags?: string[]
-    }>
-    description?: string
-  }
-
-  const getImageUrl = (item: ContentItemWithType) => {
-    // For concept art, use the first image from the images array
+  const getImageUrl = (item: ContentItemWithType): string | null => {
     if (item.type === 'concept-art' && item.images && item.images.length > 0) {
-      return urlFor(item.images[0].image)?.width(800).height(600).url()
+      return item.images[0].image ?? null
     }
-    // Check for headerImage (for technical docs and speeches)
-    if (item.headerImage) {
-      return urlFor(item.headerImage)?.width(800).height(600).url()
-    }
-    // Fallback to image field for technical docs
-    if (item.type === 'technical' && item.image) {
-      return urlFor(item.image)?.width(800).height(600).url()
-    }
+    if ('headerImage' in item && item.headerImage) return item.headerImage
+    if (item.type === 'technical' && item.image) return item.image
     return null
   }
 
   const getDescription = (item: ContentItemWithType) => {
-    if (item.type === 'concept-art' && item.description) {
-      return item.description
-    }
-    if (item.markdown) {
-      // Extract first two lines from markdown
-      const lines = item.markdown
-        .split('\n')
-        .filter((line: string) => line.trim())
+    if (item.type === 'concept-art' && item.description) return item.description
+    if ('markdown' in item && item.markdown) {
+      const lines = item.markdown.split('\n').filter((line: string) => line.trim())
       return lines.slice(0, 2).join(' ')
     }
     return null
@@ -154,20 +80,14 @@ export default async function HomePage() {
 
   const getPath = (item: ContentItemWithType) => {
     switch (item.type) {
-      case 'technical':
-        return `/technical-docs/${item.slug.current}`
-      case 'speech':
-        return `/speeches/${item.slug.current}`
-      case 'concept-art':
-        return `/concept-art/${item.slug.current}`
-      default:
-        return '/'
+      case 'technical': return `/technical-docs/${item.slug.current}`
+      case 'speech': return `/speeches/${item.slug.current}`
+      case 'concept-art': return `/concept-art/${item.slug.current}`
     }
   }
 
   return (
     <div className="py-8">
-      {/* Featured Article (Large) */}
       {featuredArticle && (
         <div className="mb-8">
           <Link href={getPath(featuredArticle)} className="block group">
@@ -208,14 +128,9 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Article Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {remainingArticles.map(article => (
-          <Link
-            key={article._id}
-            href={getPath(article)}
-            className="block group"
-          >
+          <Link key={article._id} href={getPath(article)} className="block group">
             <article className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">
               <div className="relative aspect-[3/2]">
                 {getImageUrl(article) ? (
@@ -229,11 +144,7 @@ export default async function HomePage() {
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-[var(--color-cassowary)] to-[var(--color-bird-blue)] flex items-center justify-center">
                     <span className="text-white text-2xl">
-                      {article.type === 'speech'
-                        ? '🎤'
-                        : article.type === 'technical'
-                          ? '🔧'
-                          : '🎨'}
+                      {article.type === 'speech' ? '🎤' : article.type === 'technical' ? '🔧' : '🎨'}
                     </span>
                   </div>
                 )}

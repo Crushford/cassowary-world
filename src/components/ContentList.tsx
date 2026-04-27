@@ -1,17 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import imageUrlBuilder from '@sanity/image-url'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
-import { client } from '@/sanity/client'
 
-// Configure Sanity image builder
-const { projectId, dataset } = client.config()
-const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null
-
-// Base interface for content items
 interface BaseContentItem {
   _id: string
   title: string
@@ -19,13 +8,12 @@ interface BaseContentItem {
   _createdAt: string
 }
 
-// Extended interfaces for different content types
 interface TechnicalDocItem extends BaseContentItem {
-  image?: SanityImageSource
+  image?: string | null
 }
 
 interface ConceptArtItem extends BaseContentItem {
-  headerImage?: SanityImageSource
+  headerImage?: string | null
 }
 
 type ContentItem = TechnicalDocItem | ConceptArtItem
@@ -49,20 +37,11 @@ export default function ContentList({
   thumbnailField = 'image',
   thumbnailSize = { width: 120, height: 80 }
 }: ContentListProps) {
-  const getThumbnailUrl = (item: ContentItem) => {
+  const getThumbnailUrl = (item: ContentItem): string | null => {
     if (!showThumbnails) return null
-
-    const imageSource =
-      thumbnailField === 'image'
-        ? (item as TechnicalDocItem).image
-        : (item as ConceptArtItem).headerImage
-
-    return imageSource
-      ? urlFor(imageSource)
-          ?.width(thumbnailSize.width)
-          .height(thumbnailSize.height)
-          .url()
-      : null
+    return thumbnailField === 'image'
+      ? (item as TechnicalDocItem).image ?? null
+      : (item as ConceptArtItem).headerImage ?? null
   }
 
   const containerClasses =
@@ -82,10 +61,7 @@ export default function ContentList({
           if (layout === 'grid') {
             return (
               <li key={item._id} className="doc-list-item">
-                <Link
-                  href={`${basePath}/${item.slug.current}`}
-                  className="doc-link"
-                >
+                <Link href={`${basePath}/${item.slug.current}`} className="doc-link">
                   {showThumbnails && thumbnailUrl && (
                     <div className="relative w-full aspect-[4/3] mb-4">
                       <Image
@@ -108,10 +84,7 @@ export default function ContentList({
 
           return (
             <li key={item._id} className="doc-list-item">
-              <Link
-                href={`${basePath}/${item.slug.current}`}
-                className="doc-link"
-              >
+              <Link href={`${basePath}/${item.slug.current}`} className="doc-link">
                 <div className="flex gap-4 items-start">
                   {showThumbnails && thumbnailUrl && (
                     <div className="relative rounded-lg border border-[var(--color-leaf-shadow)] flex-shrink-0">

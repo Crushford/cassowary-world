@@ -1,0 +1,42 @@
+[
+  {
+    "_createdAt": "2025-08-08T12:41:29Z",
+    "_id": "7d67ddd9-d9bf-4f3c-b5f7-8d22bf82d30c",
+    "headerImage": "/content-images/825796b2a0aa1af2c5b9802bc88431664956c92d-1536x1024.png",
+    "slug": {
+      "_type": "slug",
+      "current": "highlands-cassowaries"
+    },
+    "title": "The Highlands Pattern: What the Forest Cassowaries Still Remember"
+  },
+  {
+    "_createdAt": "2025-08-08T12:42:32Z",
+    "_id": "52b314d1-e905-4dea-adb2-5b1bc6b0993c",
+    "headerImage": "/content-images/f722ed9ec9ae691854aa410f01a58fa74937b2b0-1024x1536.png",
+    "slug": {
+      "_type": "slug",
+      "current": "games-as-culture"
+    },
+    "title": "Games as Culture: The Hidden Thread of Our Civilization"
+  },
+  {
+    "_createdAt": "2025-08-08T12:42:59Z",
+    "_id": "6047ce6d-57e4-4de9-bd38-d0879ca570b9",
+    "headerImage": "/content-images/230add4729bdf2c5f2facfd6aeb74ebeda28fe05-1024x1024.png",
+    "slug": {
+      "_type": "slug",
+      "current": "insect-farming"
+    },
+    "title": "How Insect Farming Led to Cassowary Domination"
+  },
+  {
+    "_createdAt": "2025-08-08T12:43:27Z",
+    "_id": "7f00c920-3826-4bc7-9f99-87c7075cf89d",
+    "headerImage": "/content-images/621ae90fabcf081c46db6a7c9e82bdd55898f068-1536x1024.png",
+    "slug": {
+      "_type": "slug",
+      "current": "nests-of-flame"
+    },
+    "title": "Nests of Flame: How Cassowary People Formed Homes and Families"
+  }
+]

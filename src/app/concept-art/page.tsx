@@ -1,27 +1,17 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
+import { getContentIndex } from '@/lib/content'
 import ContentList from '@/components/ContentList'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
-interface ConceptArtListItem extends SanityDocument {
+interface ConceptArtListItem {
+  _id: string
   title: string
   slug: { current: string }
-  headerImage?: SanityImageSource
+  headerImage?: string | null
   _createdAt: string
 }
 
-const CONCEPT_ART_LIST_QUERY = `*[_type == "conceptArt"] | order(_createdAt desc) {
-  title, slug, headerImage, _createdAt
-}`
-
-const options = { next: { revalidate: 30 } }
-
-export default async function ConceptArtList() {
-  const artworks = await client.fetch<ConceptArtListItem[]>(
-    CONCEPT_ART_LIST_QUERY,
-    {},
-    options
-  )
+export default function ConceptArtList() {
+  const artworks = getContentIndex<ConceptArtListItem>('concept-art')
+    .sort((a, b) => new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime())
 
   return (
     <ContentList

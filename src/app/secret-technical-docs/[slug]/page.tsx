@@ -1,28 +1,25 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
+import { getContentDoc } from '@/lib/content'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
-const DOC_QUERY = `*[_type == "secretTechnicalDocument" && slug.current == $slug][0]`
-
-const options = { next: { revalidate: 30 } }
+interface SecretDoc {
+  _id: string
+  title: string
+  _createdAt: string
+  markdown?: string
+}
 
 export default async function SecretTechnicalDocumentPage({
   params
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const doc = await client.fetch<SanityDocument>(
-    DOC_QUERY,
-    await params,
-    options
-  )
+  const { slug } = await params
+  const doc = getContentDoc<SecretDoc>('secret-technical-docs', slug)
 
-  if (!doc || !doc.markdown) {
-    notFound()
-  }
+  if (!doc || !doc.markdown) notFound()
 
   return (
     <div className="p-8 flex flex-col gap-4">
@@ -46,4 +43,3 @@ export default async function SecretTechnicalDocumentPage({
     </div>
   )
 }
-
