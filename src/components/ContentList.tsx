@@ -2,14 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import imageUrlBuilder from '@sanity/image-url'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
-import { client } from '@/sanity/client'
 
-// Configure Sanity image builder
-const { projectId, dataset } = client.config()
 const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null
+  imageUrlBuilder({ projectId: 'm6hc4vjm', dataset: 'production' }).image(source)
 
 // Base interface for content items
 interface BaseContentItem {
@@ -58,10 +53,7 @@ export default function ContentList({
         : (item as ConceptArtItem).headerImage
 
     return imageSource
-      ? urlFor(imageSource)
-          ?.width(thumbnailSize.width)
-          .height(thumbnailSize.height)
-          .url()
+      ? urlFor(imageSource).width(thumbnailSize.width).height(thumbnailSize.height).url()
       : null
   }
 
