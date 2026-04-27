@@ -1,13 +1,12 @@
 import { getContentIndex } from '@/lib/content'
 import ContentList from '@/components/ContentList'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
 interface TechnicalDoc {
   _id: string
   title: string
   slug: { current: string }
   _createdAt: string
-  image?: SanityImageSource
+  image?: string | null
 }
 
 export default function TechnicalDocumentIndexPage() {

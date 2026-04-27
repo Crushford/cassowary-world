@@ -1,15 +1,13 @@
 import { getContentDoc } from '@/lib/content'
-import imageUrlBuilder from '@sanity/image-url'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import ImageGallery from '@/components/ImageGallery'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
 interface ConceptArtImage {
-  image: SanityImageSource
+  image: string | null
   caption?: string
   tags?: string[]
 }
@@ -18,14 +16,11 @@ interface ConceptArtDocument {
   _id: string
   title: string
   slug: { current: string }
-  headerImage?: SanityImageSource
+  headerImage?: string | null
   images?: ConceptArtImage[]
   description?: string
   _createdAt: string
 }
-
-const urlFor = (source: SanityImageSource) =>
-  imageUrlBuilder({ projectId: 'm6hc4vjm', dataset: 'production' }).image(source)
 
 export default async function ConceptArtPage({
   params
@@ -37,20 +32,16 @@ export default async function ConceptArtPage({
 
   if (!doc) notFound()
 
-  const headerUrl = doc.headerImage
-    ? urlFor(doc.headerImage).width(550).height(310).url()
-    : null
-
   return (
     <div className="p-8 flex flex-col gap-4">
       <Link href="/concept-art" className="back-link">
         ← Back to gallery
       </Link>
 
-      {headerUrl && (
+      {doc.headerImage && (
         <div className="relative w-full aspect-video rounded-xl border border-[var(--color-leaf-shadow)]">
           <Image
-            src={headerUrl}
+            src={doc.headerImage}
             alt={doc.title}
             fill
             className="object-cover rounded-xl"
@@ -73,15 +64,17 @@ export default async function ConceptArtPage({
             Gallery
           </h2>
           <ImageGallery
-            images={doc.images.map((entry: ConceptArtImage, index: number) => ({
-              url: urlFor(entry.image).width(800).url() || '',
-              alt: entry.caption || 'Concept Art',
-              id: `${doc._id}-${index}`
-            }))}
+            images={doc.images
+              .filter(entry => entry.image)
+              .map((entry, index) => ({
+                url: entry.image!,
+                alt: entry.caption || 'Concept Art',
+                id: `${doc._id}-${index}`
+              }))}
           />
 
           <div className="mt-6 space-y-4">
-            {doc.images.map((entry: ConceptArtImage, i: number) => (
+            {doc.images.map((entry, i) => (
               <div key={i} className="card">
                 {entry.caption && (
                   <p className="text-sm text-[var(--foreground)] mb-2">

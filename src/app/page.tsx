@@ -1,19 +1,14 @@
 import { getContentIndex } from '@/lib/content'
 import Link from 'next/link'
 import Image from 'next/image'
-import imageUrlBuilder from '@sanity/image-url'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
-
-const urlFor = (source: SanityImageSource) =>
-  imageUrlBuilder({ projectId: 'm6hc4vjm', dataset: 'production' }).image(source)
 
 interface TechnicalDoc {
   _id: string
   title: string
   slug: { current: string }
   _createdAt: string
-  image?: SanityImageSource
-  headerImage?: SanityImageSource
+  image?: string | null
+  headerImage?: string | null
   markdown?: string
 }
 
@@ -22,7 +17,7 @@ interface Speech {
   title: string
   slug: { current: string }
   _createdAt: string
-  headerImage?: SanityImageSource
+  headerImage?: string | null
   markdown?: string
 }
 
@@ -30,12 +25,12 @@ interface ConceptArt {
   _id: string
   title: string
   slug: { current: string }
+  _createdAt: string
   images?: Array<{
-    image: SanityImageSource
+    image: string | null
     caption?: string
     tags?: string[]
   }>
-  _createdAt: string
   description?: string
 }
 
@@ -65,16 +60,12 @@ export default function HomePage() {
 
   const [featuredArticle, ...remainingArticles] = allContent
 
-  const getImageUrl = (item: ContentItemWithType) => {
+  const getImageUrl = (item: ContentItemWithType): string | null => {
     if (item.type === 'concept-art' && item.images && item.images.length > 0) {
-      return urlFor(item.images[0].image).width(800).height(600).url()
+      return item.images[0].image ?? null
     }
-    if ('headerImage' in item && item.headerImage) {
-      return urlFor(item.headerImage).width(800).height(600).url()
-    }
-    if (item.type === 'technical' && item.image) {
-      return urlFor(item.image).width(800).height(600).url()
-    }
+    if ('headerImage' in item && item.headerImage) return item.headerImage
+    if (item.type === 'technical' && item.image) return item.image
     return null
   }
 

@@ -1,12 +1,11 @@
 import { getContentIndex } from '@/lib/content'
 import ContentList from '@/components/ContentList'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
 interface ConceptArtListItem {
   _id: string
   title: string
   slug: { current: string }
-  headerImage?: SanityImageSource
+  headerImage?: string | null
   _createdAt: string
 }
 
