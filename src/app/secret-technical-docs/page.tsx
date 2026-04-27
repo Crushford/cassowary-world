@@ -1,36 +1,19 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
+import { getContentIndex } from '@/lib/content'
 import ContentList from '@/components/ContentList'
 import Link from 'next/link'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
-interface SecretTechnicalDoc extends SanityDocument {
+interface SecretTechnicalDoc {
+  _id: string
   title: string
   slug: { current: string }
   _createdAt: string
   image?: SanityImageSource
 }
 
-// Updated query to fetch secret technical documents
-const SECRET_TECHNICAL_DOCS_QUERY = `*[
-  _type == "secretTechnicalDocument"
-  && defined(slug.current)
-]|order(_createdAt desc)[0...50]{
-  _id,
-  title,
-  slug,
-  _createdAt,
-  image
-}`
-
-const options = { next: { revalidate: 30 } }
-
-export default async function SecretTechnicalDocumentIndexPage() {
-  const docs = await client.fetch<SecretTechnicalDoc[]>(
-    SECRET_TECHNICAL_DOCS_QUERY,
-    {},
-    options
-  ) || []
+export default function SecretTechnicalDocumentIndexPage() {
+  const docs = getContentIndex<SecretTechnicalDoc>('secret-technical-docs')
+    .sort((a, b) => new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime())
 
   return (
     <>
@@ -57,4 +40,3 @@ export default async function SecretTechnicalDocumentIndexPage() {
     </>
   )
 }
-

@@ -1,21 +1,21 @@
-import { type SanityDocument } from 'next-sanity'
-import { client } from '@/sanity/client'
+import { getContentDoc } from '@/lib/content'
 import imageUrlBuilder from '@sanity/image-url'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import ImageGallery from '@/components/ImageGallery'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
-// TypeScript interfaces for concept art data
 interface ConceptArtImage {
   image: SanityImageSource
   caption?: string
   tags?: string[]
 }
 
-interface ConceptArtDocument extends SanityDocument {
+interface ConceptArtDocument {
+  _id: string
   title: string
   slug: { current: string }
   headerImage?: SanityImageSource
@@ -24,29 +24,21 @@ interface ConceptArtDocument extends SanityDocument {
   _createdAt: string
 }
 
-const CONCEPT_ART_QUERY = `*[_type == "conceptArt" && slug.current == $slug][0]`
-const options = { next: { revalidate: 30 } }
-
-// Configure Sanity image builder
-const { projectId, dataset } = client.config()
 const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null
+  imageUrlBuilder({ projectId: 'm6hc4vjm', dataset: 'production' }).image(source)
 
 export default async function ConceptArtPage({
   params
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const doc = await client.fetch<ConceptArtDocument>(
-    CONCEPT_ART_QUERY,
-    await params,
-    options
-  )
+  const { slug } = await params
+  const doc = getContentDoc<ConceptArtDocument>('concept-art', slug)
+
+  if (!doc) notFound()
 
   const headerUrl = doc.headerImage
-    ? urlFor(doc.headerImage)?.width(550).height(310).url()
+    ? urlFor(doc.headerImage).width(550).height(310).url()
     : null
 
   return (
@@ -82,13 +74,12 @@ export default async function ConceptArtPage({
           </h2>
           <ImageGallery
             images={doc.images.map((entry: ConceptArtImage, index: number) => ({
-              url: urlFor(entry.image)?.width(800).url() || '',
+              url: urlFor(entry.image).width(800).url() || '',
               alt: entry.caption || 'Concept Art',
               id: `${doc._id}-${index}`
             }))}
           />
 
-          {/* Display captions and tags below the gallery */}
           <div className="mt-6 space-y-4">
             {doc.images.map((entry: ConceptArtImage, i: number) => (
               <div key={i} className="card">

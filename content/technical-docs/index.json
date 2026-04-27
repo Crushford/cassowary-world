@@ -1,0 +1,70 @@
+[
+  {
+    "_createdAt": "2025-08-05T13:50:11Z",
+    "_id": "376a5a95-865c-4268-9da0-47d5304e3bff",
+    "headerImage": null,
+    "image": {
+      "_type": "image",
+      "asset": {
+        "_ref": "image-bc71fb101e24e9e3d20e99ecd6fa502399984f7c-1536x1024-png",
+        "_type": "reference"
+      }
+    },
+    "slug": {
+      "_type": "slug",
+      "current": "agriculture-domestication-and-food-culture-in-cassowary-civilization"
+    },
+    "title": "Agriculture, Domestication, and Food Culture in Cassowary Civilization"
+  },
+  {
+    "_createdAt": "2025-08-05T16:22:23Z",
+    "_id": "356eb22f-54cb-4f9e-b199-a25171c30c7c",
+    "headerImage": null,
+    "image": {
+      "_type": "image",
+      "asset": {
+        "_ref": "image-5342629fa604b614cc30a78a52a39880fda91ffa-1536x1024-png",
+        "_type": "reference"
+      }
+    },
+    "slug": {
+      "_type": "slug",
+      "current": "casque-expansion"
+    },
+    "title": "Casque Expansion and Juvenile Dependency in Mid-Pliocene Cassowaries "
+  },
+  {
+    "_createdAt": "2025-08-05T21:05:46Z",
+    "_id": "111fb242-e6a1-4317-9fc9-0b28fcc56e9b",
+    "headerImage": null,
+    "image": {
+      "_type": "image",
+      "asset": {
+        "_ref": "image-4d1e7340866140e9fa897b5a2461f50c1c522008-1024x1024-png",
+        "_type": "reference"
+      }
+    },
+    "slug": {
+      "_type": "slug",
+      "current": "species-domestication-timeline"
+    },
+    "title": "Species Domestication Timeline"
+  },
+  {
+    "_createdAt": "2025-08-05T21:06:40Z",
+    "_id": "a5701acb-2230-440d-8d99-caf9cd14754e",
+    "headerImage": null,
+    "image": {
+      "_type": "image",
+      "asset": {
+        "_ref": "image-7642fb84de592f45e1b99e00f3ac3e8024342059-1536x1024-png",
+        "_type": "reference"
+      }
+    },
+    "slug": {
+      "_type": "slug",
+      "current": "cassowary-forelimb-evolution"
+    },
+    "title": "Cassowary Forelimb Evolution: From Vestigial Wings to Functional Arms"
+  }
+]
