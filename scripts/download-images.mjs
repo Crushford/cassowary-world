@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
 const contentRoot = path.join(projectRoot, 'content')
-const imagesDir = path.join(projectRoot, 'public', 'content-images')
+const imagesDir = path.join(projectRoot, 'content', 'images')
 
 fs.mkdirSync(imagesDir, { recursive: true })
 

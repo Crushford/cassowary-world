@@ -4,8 +4,8 @@
   "private": true,
   "packageManager": "yarn@1.22.0",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "node scripts/sync-images.mjs && next dev --turbopack",
+    "build": "node scripts/sync-images.mjs && next build",
     "start": "next start",
     "lint": "next lint",
     "export-content": "node scripts/export-from-sanity.mjs",

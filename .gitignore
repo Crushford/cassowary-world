@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# generated from content/images at build time
+/public/content-images
+
 # production
 /build
 
