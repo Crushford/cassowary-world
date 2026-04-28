@@ -84,6 +84,28 @@ export async function getBranches(): Promise<string[]> {
   return (data as { name: string }[]).map(b => b.name)
 }
 
+export type Commit = {
+  sha: string
+  shortSha: string
+  message: string
+  date: string
+}
+
+export async function getCommits(branch = 'main', perPage = 30): Promise<Commit[]> {
+  const res = await fetch(
+    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/commits?sha=${branch}&per_page=${perPage}`,
+    { headers: authHeaders(), next: { revalidate: 3600 } }
+  )
+  if (!res.ok) return []
+  const data = await res.json()
+  return (data as { sha: string; commit: { message: string; author: { date: string } } }[]).map(c => ({
+    sha: c.sha,
+    shortSha: c.sha.slice(0, 7),
+    message: c.commit.message.split('\n')[0],
+    date: c.commit.author.date.slice(0, 10),
+  }))
+}
+
 export function markdownFiles(tree: TreeItem[]): TreeItem[] {
   return tree.filter(item => item.type === 'blob' && item.path.endsWith('.md'))
 }

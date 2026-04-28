@@ -16,19 +16,20 @@ export default async function LorePage({
   searchParams,
 }: {
   params: Promise<{ path: string[] }>
-  searchParams: Promise<{ branch?: string }>
+  searchParams: Promise<{ branch?: string; commit?: string }>
 }) {
   const { path: segments } = await params
-  const { branch = 'main' } = await searchParams
+  const { branch = 'main', commit } = await searchParams
+  const ref = commit ?? branch
 
   const { primary, fallback } = urlSegmentsToFilePath(segments)
 
   // Try the direct file first, then fall back to folder README
-  let content = await getFileContent(primary, branch)
+  let content = await getFileContent(primary, ref)
   let resolvedPath = primary
 
   if (!content) {
-    content = await getFileContent(fallback, branch)
+    content = await getFileContent(fallback, ref)
     resolvedPath = fallback
   }
 
@@ -50,6 +51,9 @@ export default async function LorePage({
         </span>
         {branch !== 'main' && (
           <span className="text-xs font-mono opacity-50">branch: {branch}</span>
+        )}
+        {commit && (
+          <span className="text-xs font-mono opacity-50">@ {commit.slice(0, 7)}</span>
         )}
         <span className="text-xs font-mono opacity-30">{resolvedPath}</span>
       </div>

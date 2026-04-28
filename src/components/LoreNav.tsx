@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import {
   type TreeItem,
   type LayerType,
+  type Commit,
   getLayer,
   filePathToUrl,
   LAYER_LABELS,
@@ -17,8 +18,8 @@ import {
 
 type NavNode = {
   name: string
-  filePath: string // full repo path, e.g. 'lore/agriculture/orchard-lineage-management.md'
-  urlPath: string  // site URL, e.g. '/lore/lore/agriculture/orchard-lineage-management'
+  filePath: string
+  urlPath: string
   layer: LayerType
   children: NavNode[]
   isFolder: boolean
@@ -36,7 +37,6 @@ function buildTree(items: TreeItem[]): NavNode[] {
     const layer = getLayer(item.path)
 
     if (parts.length === 1) {
-      // Root-level file
       root.push({
         name: friendlyName(parts[0]),
         filePath: item.path,
@@ -48,7 +48,6 @@ function buildTree(items: TreeItem[]): NavNode[] {
       continue
     }
 
-    // Ensure all ancestor folders exist
     let siblings = root
     let folderPath = ''
     for (let i = 0; i < parts.length - 1; i++) {
@@ -68,7 +67,6 @@ function buildTree(items: TreeItem[]): NavNode[] {
       siblings = folderMap.get(folderPath)!.children
     }
 
-    // Add the file itself
     const fileName = parts[parts.length - 1]
     siblings.push({
       name: friendlyName(fileName),
@@ -86,9 +84,23 @@ function buildTree(items: TreeItem[]): NavNode[] {
 function friendlyName(raw: string): string {
   return raw
     .replace(/\.md$/, '')
-    .replace(/^\d+-/, '')        // strip leading number prefix (00-, 01-, etc.)
+    .replace(/^\d+-/, '')
     .replace(/[-_]/g, ' ')
     .replace(/\b\w/g, c => c.toUpperCase())
+}
+
+// ── URL helpers ────────────────────────────────────────────────────────────
+
+function buildHref(
+  urlPath: string,
+  branch: string,
+  commit: string | null
+): string {
+  const params = new URLSearchParams()
+  if (branch !== 'main') params.set('branch', branch)
+  if (commit) params.set('commit', commit)
+  const qs = params.toString()
+  return qs ? `${urlPath}?${qs}` : urlPath
 }
 
 // ── Layer badge ────────────────────────────────────────────────────────────
@@ -115,12 +127,13 @@ function BranchSelector({ branches, current }: { branches: string[]; current: st
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const branch = e.target.value
+    // Changing branch clears any selected commit
     const url = branch === 'main' ? pathname : `${pathname}?branch=${branch}`
     router.push(url)
   }
 
   return (
-    <div className="mb-4">
+    <div className="mb-3">
       <label
         htmlFor="branch-select"
         className="block text-xs font-mono uppercase mb-1 opacity-60"
@@ -147,20 +160,89 @@ function BranchSelector({ branches, current }: { branches: string[]; current: st
   )
 }
 
+// ── Commit selector ────────────────────────────────────────────────────────
+
+function CommitSelector({
+  branch,
+  currentCommit,
+}: {
+  branch: string
+  currentCommit: string | null
+}) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const [commits, setCommits] = useState<Commit[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    fetch(`/api/commits?branch=${branch}`)
+      .then(r => r.json())
+      .then((data: Commit[]) => {
+        setCommits(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [branch])
+
+  function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const commit = e.target.value
+    const params = new URLSearchParams()
+    if (branch !== 'main') params.set('branch', branch)
+    if (commit) params.set('commit', commit)
+    const qs = params.toString()
+    router.push(qs ? `${pathname}?${qs}` : pathname)
+  }
+
+  return (
+    <div className="mb-4">
+      <label
+        htmlFor="commit-select"
+        className="block text-xs font-mono uppercase mb-1 opacity-60"
+        style={{ color: 'var(--color-leaf-shadow)' }}
+      >
+        Commit
+      </label>
+      <select
+        id="commit-select"
+        value={currentCommit ?? ''}
+        onChange={onChange}
+        disabled={loading}
+        className="w-full text-sm rounded border px-2 py-1.5 font-mono"
+        style={{
+          borderColor: 'var(--color-fern)',
+          backgroundColor: 'var(--background)',
+          color: 'var(--foreground)',
+          opacity: loading ? 0.5 : 1,
+        }}
+      >
+        <option value="">Latest</option>
+        {commits.map(c => (
+          <option key={c.sha} value={c.sha}>
+            {c.shortSha} · {c.date} · {c.message.slice(0, 40)}{c.message.length > 40 ? '…' : ''}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 // ── Nav node ───────────────────────────────────────────────────────────────
 
 function NavNodeItem({
   node,
   currentUrl,
   branch,
+  commit,
   depth,
 }: {
   node: NavNode
   currentUrl: string
   branch: string
+  commit: string | null
   depth: number
 }) {
-  const href = branch === 'main' ? node.urlPath : `${node.urlPath}?branch=${branch}`
+  const href = buildHref(node.urlPath, branch, commit)
   const isActive = currentUrl === node.urlPath
   const indent = depth * 12
 
@@ -184,6 +266,7 @@ function NavNodeItem({
               node={child}
               currentUrl={currentUrl}
               branch={branch}
+              commit={commit}
               depth={depth + 1}
             />
           ))}
@@ -230,14 +313,16 @@ function LoreNavInner({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const branch = searchParams.get('branch') ?? 'main'
+  const commit = searchParams.get('commit') ?? null
   const nodes = buildTree(tree)
 
   return (
     <nav className="text-sm">
       <BranchSelector branches={branches} current={branch} />
+      <CommitSelector branch={branch} currentCommit={commit} />
 
       <Link
-        href={branch === 'main' ? '/lore' : `/lore?branch=${branch}`}
+        href={buildHref('/lore', branch, commit)}
         className="block text-xs font-mono uppercase tracking-widest mb-3 transition-opacity hover:opacity-100"
         style={{ color: 'var(--color-cassowary)', opacity: 0.8 }}
       >
@@ -251,6 +336,7 @@ function LoreNavInner({
             node={node}
             currentUrl={pathname}
             branch={branch}
+            commit={commit}
             depth={0}
           />
         ))}

@@ -8,10 +8,11 @@ export const revalidate = 3600
 export default async function LoreIndexPage({
   searchParams,
 }: {
-  searchParams: Promise<{ branch?: string }>
+  searchParams: Promise<{ branch?: string; commit?: string }>
 }) {
-  const { branch = 'main' } = await searchParams
-  const content = await getFileContent('README.md', branch)
+  const { branch = 'main', commit } = await searchParams
+  const ref = commit ?? branch
+  const content = await getFileContent('README.md', ref)
 
   if (!content) notFound()
 
@@ -31,6 +32,9 @@ export default async function LoreIndexPage({
         </span>
         {branch !== 'main' && (
           <span className="text-xs font-mono opacity-50">branch: {branch}</span>
+        )}
+        {commit && (
+          <span className="text-xs font-mono opacity-50">@ {commit.slice(0, 7)}</span>
         )}
       </div>
       <article className="prose">
