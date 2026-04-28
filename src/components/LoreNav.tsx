@@ -304,7 +304,7 @@ function hasActive(node: NavNode, currentUrl: string): boolean {
 // ── Main export ────────────────────────────────────────────────────────────
 
 function LoreNavInner({
-  tree,
+  tree: initialTree,
   branches,
 }: {
   tree: TreeItem[]
@@ -314,6 +314,17 @@ function LoreNavInner({
   const searchParams = useSearchParams()
   const branch = searchParams.get('branch') ?? 'main'
   const commit = searchParams.get('commit') ?? null
+  const ref = commit ?? branch
+
+  const [tree, setTree] = useState<TreeItem[]>(initialTree)
+
+  useEffect(() => {
+    fetch(`/api/tree?ref=${ref}`)
+      .then(r => r.json())
+      .then((data: TreeItem[]) => setTree(data))
+      .catch(() => {})
+  }, [ref])
+
   const nodes = buildTree(tree)
 
   return (
