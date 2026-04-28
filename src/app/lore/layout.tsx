@@ -1,5 +1,5 @@
 import { getTree, getBranches } from '@/lib/github'
-import LoreNav from '@/components/LoreNav'
+import LoreSidebarPanel from '@/components/LoreSidebarPanel'
 
 export default async function LoreLayout({
   children,
@@ -9,17 +9,11 @@ export default async function LoreLayout({
   const [tree, branches] = await Promise.all([getTree(), getBranches()])
 
   return (
-    <div className="flex gap-8 py-6 min-h-screen">
-      {/* Sidebar */}
-      <aside
-        className="hidden lg:block w-56 xl:w-64 shrink-0 sticky top-6 self-start max-h-[calc(100vh-3rem)] overflow-y-auto"
-        style={{ borderRight: '1px solid var(--color-fern)', paddingRight: '1.5rem' }}
-      >
-        <LoreNav tree={tree} branches={branches} />
-      </aside>
+    <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 py-6 min-h-screen">
+      <LoreSidebarPanel tree={tree} branches={branches} />
 
       {/* Content */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 pt-4 lg:pt-0">
         {children}
       </div>
     </div>

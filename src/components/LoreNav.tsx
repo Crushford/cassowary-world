@@ -235,12 +235,16 @@ function NavNodeItem({
   branch,
   commit,
   depth,
+  expandedFolders,
+  toggleFolder,
 }: {
   node: NavNode
   currentUrl: string
   branch: string
   commit: string | null
   depth: number
+  expandedFolders: Set<string>
+  toggleFolder: (path: string) => void
 }) {
   const href = buildHref(node.urlPath, branch, commit)
   const isActive = currentUrl === node.urlPath
@@ -249,28 +253,33 @@ function NavNodeItem({
   if (node.isFolder && node.children.length === 0) return null
 
   if (node.isFolder) {
-    const hasActiveChild = node.children.some(c => hasActive(c, currentUrl))
+    const isExpanded = expandedFolders.has(node.filePath)
     return (
       <li>
-        <div
-          className="flex items-center gap-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide opacity-50 mt-3"
-          style={{ paddingLeft: `${indent}px`, color: 'var(--foreground)' }}
+        <button
+          onClick={() => toggleFolder(node.filePath)}
+          className="flex items-center gap-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide mt-3 w-full text-left hover:opacity-75 transition-opacity"
+          style={{ paddingLeft: `${indent}px`, color: 'var(--foreground)', opacity: 0.5 }}
         >
+          <span className="text-[10px] w-2.5 shrink-0">{isExpanded ? '▾' : '▸'}</span>
           <span>{node.name}</span>
-          {hasActiveChild && <span style={{ color: 'var(--color-fern)' }}>▸</span>}
-        </div>
-        <ul>
-          {node.children.map(child => (
-            <NavNodeItem
-              key={child.filePath}
-              node={child}
-              currentUrl={currentUrl}
-              branch={branch}
-              commit={commit}
-              depth={depth + 1}
-            />
-          ))}
-        </ul>
+        </button>
+        {isExpanded && (
+          <ul>
+            {node.children.map(child => (
+              <NavNodeItem
+                key={child.filePath}
+                node={child}
+                currentUrl={currentUrl}
+                branch={branch}
+                commit={commit}
+                depth={depth + 1}
+                expandedFolders={expandedFolders}
+                toggleFolder={toggleFolder}
+              />
+            ))}
+          </ul>
+        )}
       </li>
     )
   }
@@ -317,6 +326,7 @@ function LoreNavInner({
   const ref = commit ?? branch
 
   const [tree, setTree] = useState<TreeItem[]>(initialTree)
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetch(`/api/tree?ref=${ref}`)
@@ -326,6 +336,31 @@ function LoreNavInner({
   }, [ref])
 
   const nodes = buildTree(tree)
+
+  // Auto-expand folders that contain the current page
+  useEffect(() => {
+    const expanded = new Set<string>()
+    function markExpanded(nodeList: NavNode[]) {
+      for (const node of nodeList) {
+        if (node.isFolder && hasActive(node, pathname)) {
+          expanded.add(node.filePath)
+          markExpanded(node.children)
+        }
+      }
+    }
+    markExpanded(nodes)
+    setExpandedFolders(expanded)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, tree])
+
+  function toggleFolder(path: string) {
+    setExpandedFolders((prev: Set<string>) => {
+      const next = new Set(prev)
+      if (next.has(path)) next.delete(path)
+      else next.add(path)
+      return next
+    })
+  }
 
   return (
     <nav className="text-sm">
@@ -349,6 +384,8 @@ function LoreNavInner({
             branch={branch}
             commit={commit}
             depth={0}
+            expandedFolders={expandedFolders}
+            toggleFolder={toggleFolder}
           />
         ))}
       </ul>
