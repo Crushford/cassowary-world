@@ -74,6 +74,13 @@ export const metadata: Metadata = {
 // Document categories
 const documentCategories = [
   {
+    id: 'lore',
+    name: 'Lore',
+    description: 'Browse the full lore library — canon documents, world systems, stories, and reference material.',
+    href: '/lore',
+    icon: '📖'
+  },
+  {
     id: 'technical',
     name: 'Technical Documents',
     description:

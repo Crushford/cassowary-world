@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cassowary World
+
+The website for [cassowaryworld.com](http://cassowaryworld.com) — a world-building lore site for the Cassowary World speculative-fiction setting.
+
+## Tech Stack
+
+- **Next.js 15** (App Router, TypeScript)
+- **Tailwind CSS 4** with `@tailwindcss/typography`
+- **react-markdown** + **remark-gfm** for markdown rendering
+- **lightgallery** for concept art image galleries
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Opens at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Content
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Content is currently sourced from local JSON files in `/content`, organised by type:
 
-## Learn More
+- `technical-docs/` — in-world technical documents
+- `secret-technical-docs/` — classified documents
+- `speeches/` — in-world speeches and proclamations
+- `concept-art/` — concept art with image galleries
 
-To learn more about Next.js, take a look at the following resources:
+Each folder has an `index.json` (metadata, no body) and one `.json` per document.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Images live in `content/images/` and are synced to `public/content-images/` at build time via `scripts/sync-images.mjs`. This runs automatically as part of `yarn dev` and `yarn build`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Build
 
-## Deploy on Vercel
+```bash
+yarn build
+yarn start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Content Migration (in progress)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The site is migrating from local JSON files to fetching content at runtime from the [cassowary-world-lore](https://github.com/Crushford/cassowary-world-lore) GitHub repo via the GitHub API. This will enable branch-based lore versioning — users can select a branch to view the world as it existed at that point in history.
+
+See [CLAUDE.md](./CLAUDE.md) for full architectural details.
