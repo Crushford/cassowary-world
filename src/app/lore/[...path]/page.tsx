@@ -59,7 +59,17 @@ export default async function LorePage({
       </div>
 
       <article className="prose">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: ({ href, ...props }) => {
+              const resolved = href?.replace(/\.md(#|$)/, (_, suffix) => suffix || '')
+              return <a href={resolved} {...props} />
+            },
+          }}
+        >
+          {content}
+        </ReactMarkdown>
       </article>
     </div>
   )
