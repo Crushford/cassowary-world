@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import {
   type TreeItem,
   type LayerType,
@@ -183,9 +183,11 @@ function BranchSelector({
   )
 }
 
-// ── Commit timeline ────────────────────────────────────────────────────────
+// ── Commit scrubber ────────────────────────────────────────────────────────
 
-function CommitTimeline({
+const N_BARS = 28
+
+function CommitScrubber({
   branch,
   currentCommit,
 }: {
@@ -194,21 +196,72 @@ function CommitTimeline({
 }) {
   const router = useRouter()
   const pathname = usePathname()
+  const trackRef = useRef<HTMLDivElement>(null)
   const [commits, setCommits] = useState<Commit[]>([])
   const [loading, setLoading] = useState(true)
+  const [dragPos, setDragPos] = useState<number | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
   useEffect(() => {
     setLoading(true)
-    fetch(`/api/commits?branch=${branch}`)
+    fetch(`/api/commits?branch=${branch}&per_page=100`)
       .then(r => r.json())
-      .then((data: Commit[]) => {
-        setCommits(data)
-        setLoading(false)
-      })
+      .then((data: Commit[]) => { setCommits(data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [branch])
 
-  function selectCommit(sha: string | null) {
+  // Chronological order (oldest → newest)
+  const chronological = [...commits].reverse()
+
+  const minMs = chronological.length > 0 ? new Date(chronological[0].date).getTime() : Date.now()
+  const maxMs = Date.now()
+  const range = Math.max(maxMs - minMs, 1)
+
+  function dateToPos(dateStr: string): number {
+    return (new Date(dateStr).getTime() - minMs) / range
+  }
+
+  // Waveform: N_BARS buckets across the time range
+  const bars: { count: number }[] = Array.from({ length: N_BARS }, () => ({ count: 0 }))
+  for (const c of chronological) {
+    const idx = Math.min(N_BARS - 1, Math.floor(dateToPos(c.date) * N_BARS))
+    bars[idx].count++
+  }
+  const maxBarCount = Math.max(...bars.map(b => b.count), 1)
+
+  // Map a 0–1 position to the nearest commit SHA (null = latest)
+  function posToCommit(pos: number): string | null {
+    if (pos > 0.98 || chronological.length === 0) return null
+    let nearest = chronological[0]
+    let minDist = Infinity
+    for (const c of chronological) {
+      const dist = Math.abs(dateToPos(c.date) - pos)
+      if (dist < minDist) { minDist = dist; nearest = c }
+    }
+    return nearest.sha
+  }
+
+  // Current thumb position (0 = oldest, 1 = latest)
+  const currentPos = (() => {
+    if (currentCommit === null) return 1
+    const c = commits.find(c => c.sha === currentCommit)
+    return c ? dateToPos(c.date) : 1
+  })()
+
+  const displayPos = dragPos ?? currentPos
+  const isLatest = currentCommit === null
+
+  // Commit shown in the label (preview while dragging, selected otherwise)
+  const labelSha = dragPos !== null ? posToCommit(dragPos) : currentCommit
+  const labelCommit = labelSha ? commits.find(c => c.sha === labelSha) ?? null : null
+
+  function getTrackPos(clientX: number): number {
+    if (!trackRef.current) return 1
+    const rect = trackRef.current.getBoundingClientRect()
+    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+  }
+
+  function navigate(sha: string | null) {
     const params = new URLSearchParams()
     if (branch !== 'main') params.set('branch', branch)
     if (sha) params.set('commit', sha)
@@ -216,84 +269,124 @@ function CommitTimeline({
     router.push(qs ? `${pathname}?${qs}` : pathname)
   }
 
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setIsDragging(true)
+    setDragPos(getTrackPos(e.clientX))
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!isDragging) return
+    setDragPos(getTrackPos(e.clientX))
+  }
+
+  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (!isDragging) return
+    setIsDragging(false)
+    const pos = getTrackPos(e.clientX)
+    setDragPos(null)
+    navigate(posToCommit(pos))
+  }
+
+  function onPointerCancel() {
+    setIsDragging(false)
+    setDragPos(null)
+  }
+
   return (
-    <div className="relative pb-1" style={{ minHeight: '2rem' }}>
-      {/* Vertical spine */}
+    <div className="pb-3">
+      {/* Scrubber track */}
       <div
-        className="absolute top-2 bottom-0"
-        style={{
-          left: '5px',
-          width: '1px',
-          backgroundColor: 'var(--color-fern)',
-          opacity: 0.3,
-        }}
-      />
+        ref={trackRef}
+        className="relative cursor-ew-resize"
+        style={{ height: '60px', touchAction: 'none', userSelect: 'none' } as React.CSSProperties}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+      >
+        {/* Baseline */}
+        <div
+          className="absolute inset-x-0"
+          style={{ bottom: '16px', height: '1px', backgroundColor: 'var(--color-fern)', opacity: 0.2 }}
+        />
 
-      {/* Latest (head) entry */}
-      {(() => {
-        const isSelected = currentCommit === null
-        return (
-          <button
-            onClick={() => selectCommit(null)}
-            className="relative flex items-center gap-2.5 w-full text-left py-1 rounded transition-opacity hover:opacity-100"
-            style={{ opacity: isSelected ? 1 : 0.6 }}
-          >
-            <span
-              className="relative z-10 shrink-0 w-2.5 h-2.5 rounded-full border-2 transition-colors"
-              style={{
-                backgroundColor: isSelected ? 'var(--color-cassowary)' : 'var(--background)',
-                borderColor: isSelected ? 'var(--color-cassowary)' : 'var(--color-fern)',
-              }}
-            />
-            <span
-              className="text-xs font-semibold"
-              style={{ color: isSelected ? 'var(--color-cassowary)' : 'var(--foreground)' }}
-            >
-              Latest
-            </span>
-          </button>
-        )
-      })()}
-
-      {loading && (
-        <div className="pl-5 py-1 text-[10px] opacity-40" style={{ color: 'var(--foreground)' }}>
-          Loading…
+        {/* Waveform bars */}
+        <div
+          className="absolute inset-x-0 flex items-end"
+          style={{ bottom: '17px', height: '36px', gap: '1px' }}
+        >
+          {!loading && bars.map((bar, i) => {
+            const barMidPos = (i + 0.5) / N_BARS
+            const filled = barMidPos <= displayPos
+            const height = bar.count > 0
+              ? Math.max(5, Math.round((bar.count / maxBarCount) * 32))
+              : 2
+            return (
+              <div
+                key={i}
+                className="flex-1 rounded-t-sm"
+                style={{
+                  height: `${height}px`,
+                  backgroundColor: filled ? 'var(--color-cassowary)' : 'var(--color-fern)',
+                  opacity: filled ? (bar.count > 0 ? 0.8 : 0.15) : (bar.count > 0 ? 0.35 : 0.1),
+                  alignSelf: 'flex-end',
+                  transition: isDragging ? 'none' : 'background-color 0.15s, opacity 0.15s',
+                }}
+              />
+            )
+          })}
         </div>
-      )}
 
-      {commits.map(c => {
-        const isSelected = currentCommit === c.sha
-        return (
+        {/* Thumb line */}
+        <div
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            top: 0,
+            bottom: '12px',
+            left: `calc(${displayPos * 100}% - 1px)`,
+            width: '2px',
+            backgroundColor: 'var(--color-cassowary)',
+            transition: isDragging ? 'none' : 'left 0.12s ease',
+          }}
+        />
+
+        {/* Thumb handle */}
+        <div
+          className="absolute w-3.5 h-3.5 rounded-full border-2 pointer-events-none"
+          style={{
+            bottom: '8px',
+            left: `calc(${displayPos * 100}% - 7px)`,
+            backgroundColor: isDragging ? 'var(--color-cassowary)' : 'var(--background)',
+            borderColor: 'var(--color-cassowary)',
+            transition: isDragging ? 'none' : 'left 0.12s ease',
+          }}
+        />
+      </div>
+
+      {/* Label */}
+      <div
+        className="flex items-center justify-between text-[10px] font-mono mt-0.5"
+        style={{ color: 'var(--foreground)' }}
+      >
+        <span className="truncate opacity-60">
+          {loading
+            ? 'Loading…'
+            : labelCommit
+              ? `${labelCommit.date} · ${labelCommit.message.slice(0, 26)}${labelCommit.message.length > 26 ? '…' : ''}`
+              : 'Latest'
+          }
+        </span>
+        {!isLatest && (
           <button
-            key={c.sha}
-            onClick={() => selectCommit(c.sha)}
-            className="relative flex items-start gap-2.5 w-full text-left py-1 rounded transition-opacity hover:opacity-100"
-            style={{ opacity: isSelected ? 1 : 0.55 }}
+            onClick={() => navigate(null)}
+            className="shrink-0 ml-2 opacity-40 hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--color-cassowary)' }}
           >
-            <span
-              className="relative z-10 mt-1 shrink-0 w-2.5 h-2.5 rounded-full border-2 transition-colors"
-              style={{
-                backgroundColor: isSelected ? 'var(--color-cassowary)' : 'var(--background)',
-                borderColor: isSelected ? 'var(--color-cassowary)' : 'var(--color-fern)',
-              }}
-            />
-            <span className="min-w-0">
-              <span
-                className="block text-[10px] font-mono"
-                style={{ color: 'var(--color-leaf-shadow)', opacity: 0.7 }}
-              >
-                {c.shortSha} · {c.date}
-              </span>
-              <span
-                className="block text-xs truncate"
-                style={{ color: isSelected ? 'var(--color-cassowary)' : 'var(--foreground)' }}
-              >
-                {c.message}
-              </span>
-            </span>
+            ↩ now
           </button>
-        )
-      })}
+        )}
+      </div>
     </div>
   )
 }
@@ -331,7 +424,7 @@ function HistoryPanel({
             showMerged={showMerged}
             onToggleMerged={() => setShowMerged((v: boolean) => !v)}
           />
-          <CommitTimeline branch={branch} currentCommit={commit} />
+          <CommitScrubber branch={branch} currentCommit={commit} />
         </div>
       )}
     </div>
