@@ -183,9 +183,11 @@ function BranchSelector({
   )
 }
 
-// ── Commit timeline ────────────────────────────────────────────────────────
+// ── Year bar chart ─────────────────────────────────────────────────────────
 
-function CommitTimeline({
+type YearGroup = { year: number; count: number; latestSha: string }
+
+function YearBarChart({
   branch,
   currentCommit,
 }: {
@@ -199,7 +201,7 @@ function CommitTimeline({
 
   useEffect(() => {
     setLoading(true)
-    fetch(`/api/commits?branch=${branch}`)
+    fetch(`/api/commits?branch=${branch}&per_page=100`)
       .then(r => r.json())
       .then((data: Commit[]) => {
         setCommits(data)
@@ -208,7 +210,7 @@ function CommitTimeline({
       .catch(() => setLoading(false))
   }, [branch])
 
-  function selectCommit(sha: string | null) {
+  function navigate(sha: string | null) {
     const params = new URLSearchParams()
     if (branch !== 'main') params.set('branch', branch)
     if (sha) params.set('commit', sha)
@@ -216,84 +218,85 @@ function CommitTimeline({
     router.push(qs ? `${pathname}?${qs}` : pathname)
   }
 
-  return (
-    <div className="relative pb-1" style={{ minHeight: '2rem' }}>
-      {/* Vertical spine */}
-      <div
-        className="absolute top-2 bottom-0"
-        style={{
-          left: '5px',
-          width: '1px',
-          backgroundColor: 'var(--color-fern)',
-          opacity: 0.3,
-        }}
-      />
+  // Group commits by year (API returns newest-first, so first entry per year = latest)
+  const yearGroups: YearGroup[] = []
+  for (const c of commits) {
+    const year = parseInt(c.date.slice(0, 4))
+    const existing = yearGroups.find(g => g.year === year)
+    if (existing) {
+      existing.count++
+    } else {
+      yearGroups.push({ year, count: 1, latestSha: c.sha })
+    }
+  }
+  yearGroups.sort((a, b) => a.year - b.year)
 
-      {/* Latest (head) entry */}
-      {(() => {
-        const isSelected = currentCommit === null
-        return (
-          <button
-            onClick={() => selectCommit(null)}
-            className="relative flex items-center gap-2.5 w-full text-left py-1 rounded transition-opacity hover:opacity-100"
-            style={{ opacity: isSelected ? 1 : 0.6 }}
-          >
-            <span
-              className="relative z-10 shrink-0 w-2.5 h-2.5 rounded-full border-2 transition-colors"
-              style={{
-                backgroundColor: isSelected ? 'var(--color-cassowary)' : 'var(--background)',
-                borderColor: isSelected ? 'var(--color-cassowary)' : 'var(--color-fern)',
-              }}
-            />
-            <span
-              className="text-xs font-semibold"
-              style={{ color: isSelected ? 'var(--color-cassowary)' : 'var(--foreground)' }}
-            >
-              Latest
-            </span>
-          </button>
-        )
-      })()}
+  const maxCount = Math.max(...yearGroups.map(g => g.count), 1)
+  const mostRecentYear = yearGroups[yearGroups.length - 1]?.year ?? null
+
+  // Determine which year is currently highlighted
+  const activeYear = currentCommit
+    ? (() => {
+        const found = commits.find(c => c.sha === currentCommit)
+        return found ? parseInt(found.date.slice(0, 4)) : null
+      })()
+    : mostRecentYear // "latest" highlights the most recent year
+
+  const isLatest = currentCommit === null
+
+  return (
+    <div>
+      {/* Latest button */}
+      <button
+        onClick={() => navigate(null)}
+        className="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded mb-3 transition-all hover:opacity-100"
+        style={{
+          border: `1px solid ${isLatest ? 'var(--color-cassowary)' : 'var(--color-fern)'}`,
+          backgroundColor: isLatest ? 'var(--color-cassowary)' + '20' : 'transparent',
+          color: isLatest ? 'var(--color-cassowary)' : 'var(--foreground)',
+          opacity: isLatest ? 1 : 0.45,
+        }}
+      >
+        Latest
+      </button>
 
       {loading && (
-        <div className="pl-5 py-1 text-[10px] opacity-40" style={{ color: 'var(--foreground)' }}>
+        <div className="text-[10px] pb-1" style={{ color: 'var(--foreground)', opacity: 0.4 }}>
           Loading…
         </div>
       )}
 
-      {commits.map(c => {
-        const isSelected = currentCommit === c.sha
-        return (
-          <button
-            key={c.sha}
-            onClick={() => selectCommit(c.sha)}
-            className="relative flex items-start gap-2.5 w-full text-left py-1 rounded transition-opacity hover:opacity-100"
-            style={{ opacity: isSelected ? 1 : 0.55 }}
-          >
-            <span
-              className="relative z-10 mt-1 shrink-0 w-2.5 h-2.5 rounded-full border-2 transition-colors"
-              style={{
-                backgroundColor: isSelected ? 'var(--color-cassowary)' : 'var(--background)',
-                borderColor: isSelected ? 'var(--color-cassowary)' : 'var(--color-fern)',
-              }}
-            />
-            <span className="min-w-0">
-              <span
-                className="block text-[10px] font-mono"
-                style={{ color: 'var(--color-leaf-shadow)', opacity: 0.7 }}
+      {!loading && yearGroups.length > 0 && (
+        <div className="flex items-end gap-1">
+          {yearGroups.map(g => {
+            const isActive = g.year === activeYear && !isLatest
+            const barHeight = Math.max(8, Math.round((g.count / maxCount) * 44))
+            return (
+              <button
+                key={g.year}
+                onClick={() => navigate(g.year === mostRecentYear ? null : g.latestSha)}
+                className="flex flex-col items-center gap-1 flex-1 transition-opacity hover:opacity-100"
+                style={{ opacity: isActive ? 1 : 0.4 }}
+                title={`${g.count} commit${g.count !== 1 ? 's' : ''} in ${g.year}`}
               >
-                {c.shortSha} · {c.date}
-              </span>
-              <span
-                className="block text-xs truncate"
-                style={{ color: isSelected ? 'var(--color-cassowary)' : 'var(--foreground)' }}
-              >
-                {c.message}
-              </span>
-            </span>
-          </button>
-        )
-      })}
+                <div
+                  className="w-full rounded-t-sm transition-all duration-150"
+                  style={{
+                    height: `${barHeight}px`,
+                    backgroundColor: isActive ? 'var(--color-cassowary)' : 'var(--color-fern)',
+                  }}
+                />
+                <span
+                  className="text-[10px] font-mono"
+                  style={{ color: isActive ? 'var(--color-cassowary)' : 'var(--foreground)' }}
+                >
+                  {g.year}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -331,7 +334,7 @@ function HistoryPanel({
             showMerged={showMerged}
             onToggleMerged={() => setShowMerged((v: boolean) => !v)}
           />
-          <CommitTimeline branch={branch} currentCommit={commit} />
+          <YearBarChart branch={branch} currentCommit={commit} />
         </div>
       )}
     </div>
