@@ -1,4 +1,4 @@
-import { getTree, getBranches } from '@/lib/github'
+import { getTree, getBranchesWithStatus } from '@/lib/github'
 import LoreSidebarPanel from '@/components/LoreSidebarPanel'
 
 export default async function LoreLayout({
@@ -6,7 +6,7 @@ export default async function LoreLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [tree, branches] = await Promise.all([getTree(), getBranches()])
+  const [tree, branches] = await Promise.all([getTree(), getBranchesWithStatus()])
 
   return (
     <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 py-6 min-h-screen">
