@@ -7,6 +7,7 @@ import {
   type TreeItem,
   type LayerType,
   type Commit,
+  type BranchStatus,
   getLayer,
   filePathToUrl,
   LAYER_LABELS,
@@ -121,26 +122,48 @@ function LayerBadge({ layer }: { layer: LayerType }) {
 
 // ── Branch selector ────────────────────────────────────────────────────────
 
-function BranchSelector({ branches, current }: { branches: string[]; current: string }) {
+function BranchSelector({
+  branches,
+  current,
+  showMerged,
+  onToggleMerged,
+}: {
+  branches: BranchStatus[]
+  current: string
+  showMerged: boolean
+  onToggleMerged: () => void
+}) {
   const router = useRouter()
   const pathname = usePathname()
 
+  const visible = showMerged ? branches : branches.filter(b => b.isActive)
+
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const branch = e.target.value
-    // Changing branch clears any selected commit
     const url = branch === 'main' ? pathname : `${pathname}?branch=${branch}`
     router.push(url)
   }
 
   return (
     <div className="mb-3">
-      <label
-        htmlFor="branch-select"
-        className="block text-xs font-mono uppercase mb-1 opacity-60"
-        style={{ color: 'var(--color-leaf-shadow)' }}
-      >
-        Branch
-      </label>
+      <div className="flex items-center justify-between mb-1">
+        <label
+          htmlFor="branch-select"
+          className="text-[10px] font-mono uppercase opacity-60"
+          style={{ color: 'var(--color-leaf-shadow)' }}
+        >
+          Branch
+        </label>
+        <label className="flex items-center gap-1 text-[10px] opacity-50 cursor-pointer hover:opacity-80 select-none">
+          <input
+            type="checkbox"
+            checked={showMerged}
+            onChange={onToggleMerged}
+            className="w-2.5 h-2.5 cursor-pointer"
+          />
+          show merged
+        </label>
+      </div>
       <select
         id="branch-select"
         value={current}
@@ -152,17 +175,17 @@ function BranchSelector({ branches, current }: { branches: string[]; current: st
           color: 'var(--foreground)',
         }}
       >
-        {branches.map(b => (
-          <option key={b} value={b}>{b}</option>
+        {visible.map(b => (
+          <option key={b.name} value={b.name}>{b.name}</option>
         ))}
       </select>
     </div>
   )
 }
 
-// ── Commit selector ────────────────────────────────────────────────────────
+// ── Commit timeline ────────────────────────────────────────────────────────
 
-function CommitSelector({
+function CommitTimeline({
   branch,
   currentCommit,
 }: {
@@ -185,44 +208,132 @@ function CommitSelector({
       .catch(() => setLoading(false))
   }, [branch])
 
-  function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const commit = e.target.value
+  function selectCommit(sha: string | null) {
     const params = new URLSearchParams()
     if (branch !== 'main') params.set('branch', branch)
-    if (commit) params.set('commit', commit)
+    if (sha) params.set('commit', sha)
     const qs = params.toString()
     router.push(qs ? `${pathname}?${qs}` : pathname)
   }
 
   return (
-    <div className="mb-4">
-      <label
-        htmlFor="commit-select"
-        className="block text-xs font-mono uppercase mb-1 opacity-60"
-        style={{ color: 'var(--color-leaf-shadow)' }}
-      >
-        Commit
-      </label>
-      <select
-        id="commit-select"
-        value={currentCommit ?? ''}
-        onChange={onChange}
-        disabled={loading}
-        className="w-full text-sm rounded border px-2 py-1.5 font-mono"
+    <div className="relative pb-1" style={{ minHeight: '2rem' }}>
+      {/* Vertical spine */}
+      <div
+        className="absolute top-2 bottom-0"
         style={{
-          borderColor: 'var(--color-fern)',
-          backgroundColor: 'var(--background)',
-          color: 'var(--foreground)',
-          opacity: loading ? 0.5 : 1,
+          left: '5px',
+          width: '1px',
+          backgroundColor: 'var(--color-fern)',
+          opacity: 0.3,
         }}
+      />
+
+      {/* Latest (head) entry */}
+      {(() => {
+        const isSelected = currentCommit === null
+        return (
+          <button
+            onClick={() => selectCommit(null)}
+            className="relative flex items-center gap-2.5 w-full text-left py-1 rounded transition-opacity hover:opacity-100"
+            style={{ opacity: isSelected ? 1 : 0.6 }}
+          >
+            <span
+              className="relative z-10 shrink-0 w-2.5 h-2.5 rounded-full border-2 transition-colors"
+              style={{
+                backgroundColor: isSelected ? 'var(--color-cassowary)' : 'var(--background)',
+                borderColor: isSelected ? 'var(--color-cassowary)' : 'var(--color-fern)',
+              }}
+            />
+            <span
+              className="text-xs font-semibold"
+              style={{ color: isSelected ? 'var(--color-cassowary)' : 'var(--foreground)' }}
+            >
+              Latest
+            </span>
+          </button>
+        )
+      })()}
+
+      {loading && (
+        <div className="pl-5 py-1 text-[10px] opacity-40" style={{ color: 'var(--foreground)' }}>
+          Loading…
+        </div>
+      )}
+
+      {commits.map(c => {
+        const isSelected = currentCommit === c.sha
+        return (
+          <button
+            key={c.sha}
+            onClick={() => selectCommit(c.sha)}
+            className="relative flex items-start gap-2.5 w-full text-left py-1 rounded transition-opacity hover:opacity-100"
+            style={{ opacity: isSelected ? 1 : 0.55 }}
+          >
+            <span
+              className="relative z-10 mt-1 shrink-0 w-2.5 h-2.5 rounded-full border-2 transition-colors"
+              style={{
+                backgroundColor: isSelected ? 'var(--color-cassowary)' : 'var(--background)',
+                borderColor: isSelected ? 'var(--color-cassowary)' : 'var(--color-fern)',
+              }}
+            />
+            <span className="min-w-0">
+              <span
+                className="block text-[10px] font-mono"
+                style={{ color: 'var(--color-leaf-shadow)', opacity: 0.7 }}
+              >
+                {c.shortSha} · {c.date}
+              </span>
+              <span
+                className="block text-xs truncate"
+                style={{ color: isSelected ? 'var(--color-cassowary)' : 'var(--foreground)' }}
+              >
+                {c.message}
+              </span>
+            </span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── History panel ──────────────────────────────────────────────────────────
+
+function HistoryPanel({
+  branches,
+  branch,
+  commit,
+}: {
+  branches: BranchStatus[]
+  branch: string
+  commit: string | null
+}) {
+  const [isOpen, setIsOpen] = useState(true)
+  const [showMerged, setShowMerged] = useState(false)
+
+  return (
+    <div className="mb-4">
+      <button
+        onClick={() => setIsOpen((o: boolean) => !o)}
+        className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest w-full text-left py-1 hover:opacity-100 transition-opacity"
+        style={{ color: 'var(--color-cassowary)', opacity: 0.75 }}
       >
-        <option value="">Latest</option>
-        {commits.map(c => (
-          <option key={c.sha} value={c.sha}>
-            {c.shortSha} · {c.date} · {c.message.slice(0, 40)}{c.message.length > 40 ? '…' : ''}
-          </option>
-        ))}
-      </select>
+        <span className="text-[10px]">{isOpen ? '▾' : '▸'}</span>
+        History
+      </button>
+
+      {isOpen && (
+        <div className="mt-2">
+          <BranchSelector
+            branches={branches}
+            current={branch}
+            showMerged={showMerged}
+            onToggleMerged={() => setShowMerged((v: boolean) => !v)}
+          />
+          <CommitTimeline branch={branch} currentCommit={commit} />
+        </div>
+      )}
     </div>
   )
 }
@@ -317,7 +428,7 @@ function LoreNavInner({
   branches,
 }: {
   tree: TreeItem[]
-  branches: string[]
+  branches: BranchStatus[]
 }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -364,8 +475,7 @@ function LoreNavInner({
 
   return (
     <nav className="text-sm">
-      <BranchSelector branches={branches} current={branch} />
-      <CommitSelector branch={branch} currentCommit={commit} />
+      <HistoryPanel branches={branches} branch={branch} commit={commit} />
 
       <Link
         href={buildHref('/lore', branch, commit)}
@@ -398,7 +508,7 @@ export default function LoreNav({
   branches,
 }: {
   tree: TreeItem[]
-  branches: string[]
+  branches: BranchStatus[]
 }) {
   return (
     <Suspense fallback={null}>

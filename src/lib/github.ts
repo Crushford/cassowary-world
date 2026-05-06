@@ -84,6 +84,34 @@ export async function getBranches(): Promise<string[]> {
   return (data as { name: string }[]).map(b => b.name)
 }
 
+export type BranchStatus = {
+  name: string
+  isActive: boolean
+}
+
+export async function getBranchesWithStatus(): Promise<BranchStatus[]> {
+  const branches = await getBranches()
+
+  const checks = branches
+    .filter(b => b !== 'main')
+    .map(async (branch): Promise<BranchStatus> => {
+      try {
+        const res = await fetch(
+          `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/compare/main...${encodeURIComponent(branch)}`,
+          { headers: authHeaders(), next: { revalidate: 3600 } }
+        )
+        if (!res.ok) return { name: branch, isActive: true }
+        const data = await res.json()
+        return { name: branch, isActive: (data.ahead_by ?? 0) > 0 }
+      } catch {
+        return { name: branch, isActive: true }
+      }
+    })
+
+  const statuses = await Promise.all(checks)
+  return [{ name: 'main', isActive: true }, ...statuses]
+}
+
 export type Commit = {
   sha: string
   shortSha: string

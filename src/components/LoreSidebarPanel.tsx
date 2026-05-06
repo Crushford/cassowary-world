@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { type TreeItem } from '@/lib/github'
+import { type TreeItem, type BranchStatus } from '@/lib/github'
 import LoreNav from './LoreNav'
 
 export default function LoreSidebarPanel({
@@ -9,7 +9,7 @@ export default function LoreSidebarPanel({
   branches,
 }: {
   tree: TreeItem[]
-  branches: string[]
+  branches: BranchStatus[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
